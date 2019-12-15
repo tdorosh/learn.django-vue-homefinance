@@ -21,6 +21,11 @@ class AccountSerializer(serializers.ModelSerializer):
         model = models.Account
         fields = '__all__'
 
+class AccountJounalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AccountJournal
+        fields = '__all__'
+
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Currency
