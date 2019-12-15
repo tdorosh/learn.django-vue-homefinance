@@ -21,7 +21,7 @@ class AccountSerializer(serializers.ModelSerializer):
         model = models.Account
         fields = '__all__'
 
-class AccountJounalSerializer(serializers.ModelSerializer):
+class AccountJournalSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AccountJournal
         fields = '__all__'

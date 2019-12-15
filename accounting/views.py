@@ -80,6 +80,10 @@ class AccountViewSet(viewsets.ModelViewSet):
         except (KeyError, AttributeError):
             return super().get_serializer_class()
 
+class AccountJournalViewSet(viewsets.ModelViewSet):
+    queryset = models.AccountJournal.objects.all()
+    serializer_class = serializers.AccountJournalSerializer
+
 class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = models.Currency.objects.all()
     serializer_class = serializers.CurrencySerializer
