@@ -1,6 +1,7 @@
 import {
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, CREATE_ACCOUNT, REMOVE_ACCOUNT,
+  SET_JOURNALS,
   SET_CURRENCIES, ADD_CURRENCY, REMOVE_CURRENCY,
   SET_CATEGORIES, CREATE_CATEGORY, REMOVE_CATEGORY,
   SET_SUBCATEGORIES, CREATE_SUBCATEGORY, REMOVE_SUBCATEGORY,
@@ -37,6 +38,11 @@ export default {
   [REMOVE_ACCOUNT] (state, account) {
     state.accounts.splice(state.accounts.indexOf(account), 1);
   },
+
+  //Accounts Journals mutations
+  [SET_JOURNALS] (state, journals) {
+    state.journals = journals;
+  }
 
   //Currencies mutations
   [SET_CURRENCIES] (state, currencies) {

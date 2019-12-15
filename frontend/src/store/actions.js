@@ -3,6 +3,7 @@ import axios from 'axios'
 import {
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, CREATE_ACCOUNT, REMOVE_ACCOUNT,
+  SET_JOURNALS,
   SET_CURRENCIES, ADD_CURRENCY, REMOVE_CURRENCY,
   SET_CATEGORIES, CREATE_CATEGORY, REMOVE_CATEGORY,
   SET_SUBCATEGORIES, CREATE_SUBCATEGORY, REMOVE_SUBCATEGORY,
@@ -69,6 +70,13 @@ const actions = {
     const response = await HTTP.delete(`accounts/${account.id}/`);
     if (response.status === 204) {
       commit(REMOVE_ACCOUNT, account)
+    }
+  },
+  //Accounts Journals actions
+  async getJournals ({ commit }) {
+    const response = await HTTP.get('journals/');
+    if (response.status == 200) {
+      commit(SET_JOURNALS, response.data.results)
     }
   },
   //Currencies actions

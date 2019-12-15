@@ -10,6 +10,9 @@ export const SET_ACCOUNTS = 'SET_ACCOUNTS'
 export const CREATE_ACCOUNT = 'CREATE_ACCOUNT'
 export const REMOVE_ACCOUNT = 'REMOVE_ACCOUNT'
 
+//Accounts Journals mutations types
+export const SET_JOURNALS = 'SET_JOURNALS'
+
 //Currencies mutations types
 export const SET_CURRENCIES = 'SET_CURRENCIES'
 export const ADD_CURRENCY = 'ADD_CURRENCY'
