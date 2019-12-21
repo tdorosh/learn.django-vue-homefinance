@@ -3,6 +3,12 @@ import VueRouter from 'vue-router'
 import Home from './views/Home.vue'
 
 const transactionList = () => import(/* */ '@/components/transaction/transactionList.vue')
+const accountList = () => import(/* */ '@/components/account/accountList.vue')
+const journalList = () => import(/* */ '@/components/journal/journalList.vue')
+const currencyList = () => import(/* */ '@/components/currency/currencyList.vue')
+const categoryList = () => import(/* */ '@/components/category/categoryList.vue')
+const subcategoryList = () => import(/* */ '@/components/subcategory/subcategoryList.vue')
+const placeList = () => import(/* */ '@/components/place/placeList.vue')
 
 Vue.use(VueRouter)
 
@@ -40,27 +46,32 @@ export default new VueRouter({
     {
       path: '/accounting/accounts',
       name: 'accounts',
-      //component: ,
+      component: accountList,
     },
     {
       path: '/accounting/journal',
       name: 'journal',
-      //component: ,
+      component: journalList,
+    },
+    {
+      path: '/accounting/currencies',
+      name: 'currencies',
+      component: currencyList,
     },
     {
       path: '/accounting/categories',
       name: 'categories',
-      //component: ,
+      component: categoryList,
     },
     {
       path: '/accounting/subcategories',
       name: 'subcategories',
-      //component: ,
+      component: subcategoryList,
     },
     {
         path: '/accounting/places',
         name: 'places',
-        //component: ,
+        component: placeList,
     },
         
     // Planning routes

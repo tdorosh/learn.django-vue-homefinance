@@ -9,6 +9,7 @@
             <b-dropdown-item :to="{ name: 'transactions' }">Transactions</b-dropdown-item>
             <b-dropdown-item :to="{ name: 'accounts' }">Accounts</b-dropdown-item>
             <b-dropdown-item :to="{ name: 'journal' }">Journal</b-dropdown-item>
+            <b-dropdown-item :to="{ name: 'currencies' }">Currencies</b-dropdown-item>
             <b-dropdown-item :to="{ name: 'categories' }">Categories</b-dropdown-item>
             <b-dropdown-item :to="{ name: 'subcategories' }">Subcategories</b-dropdown-item>
             <b-dropdown-item :to="{ name: 'places' }">Places</b-dropdown-item>
