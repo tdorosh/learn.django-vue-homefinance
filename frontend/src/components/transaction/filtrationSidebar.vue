@@ -61,6 +61,7 @@
                   id="trans_type"
                   v-model="form.trans_type"
                   :options="transactionTypes"
+                  @change="setNullAccounts()"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -72,7 +73,7 @@
                 <b-form-select 
                   id="category" 
                   v-model="form.category"
-                  :options="getTargets(categories)"
+                  :options="getTargets(getFilterCategories(form.trans_type))"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -81,7 +82,7 @@
                 <b-form-select 
                   id="subcategory" 
                   v-model="form.subcategory"
-                  :options="getTargets(subcategories)"
+                  :options="getTargets(getFilterSubcategories(form.category))"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -93,7 +94,8 @@
                 <b-form-select 
                   id="from_account" 
                   v-model="form.from_account"
-                  :options="getTargets(accounts)"
+                  :options="getTargets(getFilterAccounts(form.currency))"
+                  :disabled="form.trans_type === 'INC'"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -102,8 +104,21 @@
                 <b-form-select 
                   id="on_account" 
                   v-model="form.on_account"
-                  :options="getTargets(accounts)"
+                  :options="getTargets(getFilterAccounts(form.currency))"
+                  :disabled="form.trans_type === 'EXP'"
                 ></b-form-select>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <b-row>
+            <b-col cols=12>
+              <b-form-group label="Date and Time" label-for="create_datetime">
+                <date-picker 
+                  id="create_datetime" 
+                  v-model="form.create_datetime"
+                  :config="options"
+                ></date-picker>
               </b-form-group>
             </b-col>
           </b-row>
@@ -120,14 +135,9 @@
             </b-col>
           </b-row>
 
-          <b-row>
-            <b-col cols=6>
-              <b-button type="submit" variant="primary">Submit</b-button>
-            </b-col>
-            <b-col cols=6>
-              <b-button type="reset" variant="danger">Reset</b-button>
-            </b-col>
-          </b-row>
+          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="reset" variant="danger">Reset</b-button>
+
         </b-form>
       </b-col>
     </b-row>
@@ -136,16 +146,22 @@
 
 <script>
 
+import 'bootstrap/dist/css/bootstrap.css'
+import datePicker from 'vue-bootstrap-datetimepicker'
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
+
 import { mapGetters } from 'vuex';
 import { getTargets } from '@/utils.js';
 
 export default {
   name: 'filtrationSidebar',
-  props: [],
+  components: {
+    datePicker,
+  },
   data() {
     return {
       form: {
-        from_amount: 0,
+        from_amount: null,
         to_amount: null,
         currency: null,
         trans_type: null,
@@ -163,6 +179,9 @@ export default {
         { value: 'EXP', text: 'Expences'},
         { value: 'TEC', text: 'Technical'},
       ],
+      options: {
+        format: 'DD.MM.YYYY, HH:mm:ss',
+      },
     }
   },
   computed: {
@@ -183,13 +202,14 @@ export default {
         subcategory: this.form.subcategory,
         from_account: this.form.from_account,
         on_account: this.form.on_account,
+        create_datetime: this.form.create_datetime,
         place: this.form.place,
       }}
       this.$store.dispatch('getTransactions', params);
     },
     onReset(evt) {
       evt.preventDefault();
-      this.form.from_amount = 0,
+      this.form.from_amount = null,
       this.form.to_amount = null,
       this.form.currency = null;
       this.form.trans_type = null;
@@ -197,6 +217,7 @@ export default {
       this.form.subcategory = null;
       this.form.from_account = null;
       this.form.on_account = null;
+      this.form.create_datetime = null;
       this.form.place = null;
       this.$store.dispatch('getTransactions');
     },
@@ -208,14 +229,51 @@ export default {
       this.$store.dispatch('getTransactions', params);
     },
     getTargets: getTargets,
+    getFilterAccounts(currencyId) {
+      if (currencyId) {
+        const currency = this.currencies.filter(currency => {
+          return currency.id === currencyId;
+        })[0].name;
+        return this.accounts.filter(account => {
+          return account.currency === currency;
+      });
+      } else {
+        return this.accounts;
+      }
+    },
+    getFilterCategories(trans_type) {
+      if (trans_type) {
+        return this.categories.filter(category => {
+          return category.cat_type === trans_type;
+      });
+      } else {
+        return this.categories;
+      }
+    },
+    getFilterSubcategories(category) {
+      if (category) {
+        return this.subcategories.filter(subcategory => {
+          return subcategory.category === category;
+      });
+      } else {
+        return this.subcategories;
+      }
+    },
+    setNullAccounts() {
+      if (this.form.trans_type === 'INC') {
+        this.form.from_account = null;
+      } else if (this.form.trans_type === 'EXP') {
+        this.form.on_account = null;
+      }
+    },
   },
   beforeMount() {
     //Get data for selects from api
     this.$store.dispatch('getAccounts');
     this.$store.dispatch('getCurrencies');
-    this.$store.dispatch('getCategories');
+    this.$store.dispatch('getCategories', { params: {no_page: 'yes'}});
     this.$store.dispatch('getSubcategories');
     this.$store.dispatch('getPlaces');
-  }
+  },
 }
 </script>

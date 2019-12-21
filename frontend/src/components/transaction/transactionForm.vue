@@ -5,17 +5,18 @@
         <b-form @submit="onSubmit">
           <b-row>
             <b-col cols=4>
-              <b-form-group label="Amount" label-for="amount">
+              <b-form-group label="Amount*" label-for="amount">
                 <b-form-input 
                   id="amount" 
                   v-model="form.amount"
                   type="number"
+                  min="0.01"
                   required
                 ></b-form-input>
               </b-form-group>
             </b-col>
             <b-col cols=4>
-              <b-form-group label="Currency" label-for="currency">
+              <b-form-group label="Currency*" label-for="currency">
                 <b-form-select 
                   id="currency" 
                     v-model="form.currency"
@@ -25,11 +26,12 @@
               </b-form-group>
             </b-col>
             <b-col cols=4>
-              <b-form-group label="Transaction Type" label-for="trans_type">
+              <b-form-group label="Type*" label-for="trans_type">
                 <b-form-select 
                   id="trans_type" 
                   v-model="form.trans_type"
                   :options="transactionTypes"
+                  @change="setNullAccounts()"
                   required
                 ></b-form-select>
               </b-form-group>
@@ -42,7 +44,7 @@
                 <b-form-select 
                   id="category" 
                   v-model="form.category"
-                  :options="getTargets(categories)"
+                  :options="getTargets(getFilterCategories(form.trans_type))"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -51,7 +53,7 @@
                 <b-form-select 
                   id="subcategory" 
                   v-model="form.subcategory"
-                  :options="getTargets(subcategories)"
+                  :options="getTargets(getFilterSubcategories(form.category))"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -59,20 +61,24 @@
 
           <b-row>
             <b-col cols=6>
-              <b-form-group label="From account" label-for="from_account">
+              <b-form-group :label="getFromLabel()" label-for="from_account">
                 <b-form-select 
                   id="from_account" 
                   v-model="form.from_account"
-                  :options="getTargets(accounts)"
+                  :options="getTargets(getFilterAccounts(form.currency))"
+                  :disabled="form.trans_type === 'INC'"
+                  :required="form.trans_type === 'EXP' || form.trans_type === 'TEC'"
                 ></b-form-select>
               </b-form-group>
             </b-col>
             <b-col cols=6>
-              <b-form-group label="On account" label-for="on_account">
+              <b-form-group :label="getOnLabel()"  label-for="on_account">
                 <b-form-select 
                   id="on_account" 
                   v-model="form.on_account"
-                  :options="getTargets(accounts)"
+                  :options="getTargets(getFilterAccounts(form.currency))"
+                  :disabled="form.trans_type === 'EXP'"
+                  :required="form.trans_type === 'INC' || form.trans_type === 'TEC'"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -81,11 +87,11 @@
           <b-row>
             <b-col cols=6>
               <b-form-group label="Date and Time" label-for="create_datetime">
-                <b-form-input 
+                <date-picker 
                   id="create_datetime" 
                   v-model="form.create_datetime"
-                  type="text"
-                ></b-form-input>
+                  :config="options"
+                ></date-picker>
               </b-form-group>
             </b-col>
             <b-col cols=6>
@@ -110,14 +116,9 @@
             </b-col>
           </b-row>
 
-          <b-row>
-            <b-col cols=6>
-              <b-button type="submit" variant="primary">Submit</b-button>
-            </b-col>
-            <b-col cols=6>
-              <b-button @click="$bvModal.hide('transactionForm')">Cancel</b-button>
-            </b-col>
-          </b-row>
+          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button @click="$bvModal.hide('transactionForm')">Cancel</b-button>
+          
         </b-form>
       </b-col>
     </b-row>
@@ -126,12 +127,19 @@
 
 <script>
 
+import 'bootstrap/dist/css/bootstrap.css'
+import datePicker from 'vue-bootstrap-datetimepicker'
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
+
 import { mapGetters } from 'vuex';
 import { getTargets } from '@/utils.js';
 
 export default {
   name: 'transactionForm',
   props: ['transactionId', 'action'],
+  components: {
+    datePicker,
+  },
   data() {
     return {
       form: {
@@ -152,6 +160,9 @@ export default {
         { value: 'EXP', text: 'Expences'},
         { value: 'TEC', text: 'Technical'},
       ],
+      options: {
+        format: 'DD.MM.YYYY, HH:mm:ss',
+      },
     }
   },
   computed: {
@@ -185,7 +196,7 @@ export default {
                 
       } else if (this.action === 'update') {
           const transactionData = {
-            id: this.form.id,
+            id: this.transactionId,
             data: {
               amount: this.form.amount,
               currency: this.form.currency,
@@ -211,7 +222,6 @@ export default {
         this.$store.dispatch('getTransaction', this.transactionId)
           .then(() => {
             const transaction = this.transaction;
-            this.form.id = transaction.id,
             this.form.amount = transaction.amount;
             this.form.currency = transaction.currency;
             this.form.trans_type = transaction.trans_type;
@@ -228,6 +238,57 @@ export default {
         }  
     },
     getTargets: getTargets,
+    getFilterAccounts(currencyId) {
+      if (currencyId) {
+        const currency = this.currencies.filter(currency => {
+          return currency.id === currencyId;
+        })[0].name;
+        return this.accounts.filter(account => {
+          return account.currency === currency;
+      });
+      } else {
+        return this.accounts;
+      }
+    },
+    getFilterCategories(trans_type) {
+      if (trans_type) {
+        return this.categories.filter(category => {
+          return category.cat_type === trans_type;
+      });
+      } else {
+        return this.categories;
+      }
+    },
+    getFilterSubcategories(category) {
+      if (category) {
+        return this.subcategories.filter(subcategory => {
+          return subcategory.category === category;
+      });
+      } else {
+        return this.subcategories;
+      }
+    },
+    setNullAccounts() {
+      if (this.form.trans_type === 'INC') {
+        this.form.from_account = null;
+      } else if (this.form.trans_type === 'EXP') {
+        this.form.on_account = null;
+      }
+    },
+    getFromLabel() {
+      if (this.form.trans_type === 'EXP' || this.form.trans_type === 'TEC') {
+        return 'From Account*';
+      } else if (this.form.trans_type === 'INC' || this.form.trans_type === null) {
+        return 'From Account';
+      }
+    },
+    getOnLabel() {
+      if (this.form.trans_type === 'INC' || this.form.trans_type === 'TEC') {
+        return 'On Account*';
+      } else if (this.form.trans_type === 'EXP' || this.form.trans_type === null) {
+        return 'On Account';
+      }
+    },
   },
   beforeMount() {
     //Get data for selects from api
