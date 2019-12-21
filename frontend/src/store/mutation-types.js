@@ -1,3 +1,5 @@
+//Mutation for save objects count
+export const SET_OBJECTS_COUNT = 'SET_OBJECTS_COUNT'
 //Transactions mutations types
 export const SET_TRANSACTIONS = 'SET_TRANSACTIONS'
 export const SET_TRANSACTION = 'SET_TRANSACTION'
@@ -7,6 +9,7 @@ export const REMOVE_TRANSACTION = 'REMOVE_TRANSACTION'
 
 //Accounts mutations types
 export const SET_ACCOUNTS = 'SET_ACCOUNTS'
+export const SET_ACCOUNT = 'SET_ACCOUNT'
 export const CREATE_ACCOUNT = 'CREATE_ACCOUNT'
 export const REMOVE_ACCOUNT = 'REMOVE_ACCOUNT'
 
