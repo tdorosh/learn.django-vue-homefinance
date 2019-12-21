@@ -40,7 +40,6 @@ class Transaction(models.Model):
                                         )
 
 class AccountJournal(models.Model):
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, null=True)
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     amount_before = models.DecimalField(max_digits=7, decimal_places=2, null=True)
     amount_after = models.DecimalField(max_digits=7, decimal_places=2)
@@ -63,7 +62,7 @@ class Account(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.old_amount != self.amount:
-            AccountJournal.objects.create(transaction=None, account=self, amount_before=self.old_amount, amount_after=self.amount)
+            AccountJournal.objects.create(account=self, amount_before=self.old_amount, amount_after=self.amount)
 
     def increase(self, sum, currency):
         if self.currency.id == currency:
