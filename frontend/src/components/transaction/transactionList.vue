@@ -1,17 +1,22 @@
 <template>
   <div class="container">
-    <b-row>
-      <h3>Transaction List</h3>&nbsp;
-      <b-button @click="showCreateModal()" variant="info">Create</b-button>
-    </b-row>
+    <h3>Transactions List</h3>
+    <b-button @click="showCreateModal()" variant="info">Create</b-button>
     <b-row>
       <b-col cols="9">
         <b-table :items="transactions" :fields="fields" responsive primary-key="id">
+          <template v-slot:cell(trans_type)="data">
+            <p>{{ getCategory(data.value) }}</p>
+          </template>
+          <template v-slot:cell(create_datetime)="data">
+            <p>{{ new Date(data.value) }}</p>
+          </template>
           <template v-slot:cell(actions)="data">
             <b-button @click="showEditModal(data.item.id)" variant="warning" size="sm">Edit</b-button>&nbsp;
             <b-button @click="showDeleteModal(data.item.id)" variant="danger" size="sm">Delete</b-button>
           </template>
         </b-table>
+        <paginateNav :property="'transactions'" @set-page-request="setPaginationRequest" />
       </b-col>
       <b-col cols="3">
         <filtrationSidebar/>
@@ -37,12 +42,14 @@
 
 import transactionForm from '@/components/transaction/transactionForm.vue';
 import filtrationSidebar from '@/components/transaction/filtrationSidebar.vue';
+import paginateNav from '@/components/paginate.vue';
 
 export default {
   name: 'transactionList',
   components: {
     transactionForm,
     filtrationSidebar,
+    paginateNav,
   },
   data() {
     return {
@@ -57,7 +64,6 @@ export default {
           'subcategory',
           'from_account',
           'on_account',
-          'from_account',
           'create_datetime',
           'place',
           'notes',
@@ -106,6 +112,9 @@ export default {
   methods: {
     onDelete(transactionId) {
       this.$store.dispatch('deleteTransaction', transactionId)
+      .then(() => {
+        this.$store.dispatch('getTransactions')
+      })
     },
     showCreateModal() {
       this.action = 'create';
@@ -122,8 +131,22 @@ export default {
       this.transactionId = transactionId;
       this.$bvModal.show('deleteTransaction');
     },
+    getCategory(cat_value) {
+      if (cat_value === 'INC') {
+        return 'Income';
+      } else if (cat_value === 'EXP') {
+        return 'Expences';
+      } else {
+        return 'Technical';
+      }
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+      }};
+      this.$store.dispatch('getTransactions', params);
+    },
   },
-
   beforeMount() {
     this.$store.dispatch('getTransactions');
   },  
