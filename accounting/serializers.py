@@ -22,9 +22,10 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AccountJournalSerializer(serializers.ModelSerializer):
+    account = serializers.StringRelatedField()
     class Meta:
         model = models.AccountJournal
-        fields = '__all__'
+        fields = ('id', 'account', 'amount_before', 'amount_after', 'timestamp')
 
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,4 +69,10 @@ class RetrieveAccountSerializer(serializers.ModelSerializer):
         model = models.Account
         fields = ('id', 'title', 'amount', 'currency',
                  'notes', 'create_datetime')
+
+class RetrieveSubcategorySerializer(serializers.ModelSerializer):
+    category = ObjectRepresentationField(read_only='True')
+    class Meta:
+        model = models.Subcategory
+        fields = ('id', 'name', 'category')
 
