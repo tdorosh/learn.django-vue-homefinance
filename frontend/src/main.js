@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import App from './App.vue'
 import store from './store'
 import router from './router'
+import Paginate from 'vuejs-paginate'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -10,8 +11,10 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 Vue.config.productionTip = false
 
-Vue.use(BootstrapVue)
 Vue.use(Vuex)
+Vue.use(BootstrapVue)
+Vue.component('paginate', Paginate)
+
 
 new Vue({
   router,
