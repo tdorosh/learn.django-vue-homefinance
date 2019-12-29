@@ -1,22 +1,74 @@
-import axios from 'axios'
-
 import {
+  AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
+  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER,
   SET_OBJECTS_COUNT,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
-  SET_JOURNALS,
+  SET_JOURNAL,
   SET_CURRENCIES, ADD_CURRENCY, REMOVE_CURRENCY,
   SET_CATEGORIES, CREATE_CATEGORY, REMOVE_CATEGORY,
   SET_SUBCATEGORIES, CREATE_SUBCATEGORY, REMOVE_SUBCATEGORY,
   SET_PLACES, ADD_PLACE, REMOVE_PLACE,
 } from './mutation-types.js'
 
-const HTTP = axios.create({
-  baseURL:'http://127.0.0.1:8000/'
-})
+import axiosInstance from '../axios.js'
+
+const HTTP = axiosInstance;
 
 const actions = {
 
+  //Auth actions
+  authRequest ({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_REQUEST);
+      HTTP.post('api/token/', data)
+      .then((response) => {
+        const token = response.data.access;
+        localStorage.setItem('user-token', token);
+        axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
+        commit(AUTH_SUCCESS, token);
+        resolve(response);
+      })
+      .catch((err) => {
+        commit(AUTH_ERROR);
+        localStorage.removeItem('user-token');
+        reject(err);
+      });
+    });
+  },
+  authLogout ({ commit }) {
+    return new Promise((resolve) => {
+      commit(AUTH_LOGOUT);
+      localStorage.removeItem('user-token');
+      delete axiosInstance.defaults.headers.common.Authorization;
+      resolve();
+    })
+  },
+  //User actions
+  async getUser({ commit }) {
+    const response = await HTTP.get('users/');
+    if (response.status === 200) {
+      commit(SET_USER, response.data.results)
+    }
+  },
+  async createUser({ commit }, data) {
+    const response = await HTTP.post('users/create/', data);
+    if (response.status === 201) {
+      commit(CREATE_USER);
+    }
+  },
+  async updateUser({ commit }, userData) {
+    const response = await HTTP.put(`users/profile/${userData.id}/`, userData.data);
+    if (response.status === 200) {
+      commit(UPDATE_USER);
+    }
+  },
+  async deleteUser({ commit }, userId) {
+    const response = await HTTP.delete(`users/profile/${userId}/`);
+    if (response.status === 204) {
+      commit(DELETE_USER);
+    }
+  },
   //Transactions actions
   async getTransactions ({ commit }, params) {
     const response = await HTTP.get('transactions/', params);
@@ -26,7 +78,7 @@ const actions = {
     }
   },
   async getTransaction({ commit }, transactionId) {
-    const response = await HTTP.get(`transactions/${transactionId}`)
+    const response = await HTTP.get(`transactions/${transactionId}/`)
     if (response.status === 200) {
       commit(SET_TRANSACTION, response.data)
     }
@@ -59,7 +111,7 @@ const actions = {
     }
   },
   async getAccount({ commit }, accountId) {
-    const response = await HTTP.get(`accounts/${accountId}`)
+    const response = await HTTP.get(`accounts/${accountId}/`)
     if (response.status === 200) {
       commit(SET_ACCOUNT, response.data)
     }
@@ -82,12 +134,12 @@ const actions = {
       commit(REMOVE_ACCOUNT, accountId)
     }
   },
-  //Accounts Journals actions
-  async getJournals ({ commit }, params) {
-    const response = await HTTP.get('journals/', params);
+  //Accounts Journal actions
+  async getJournal ({ commit }, params) {
+    const response = await HTTP.get('journal/', params);
     if (response.status == 200) {
-      commit(SET_JOURNALS, response.data.results);
-      commit(SET_OBJECTS_COUNT, { propertyName: 'journals', countNumber: response.data.count })
+      commit(SET_JOURNAL, response.data.results);
+      commit(SET_OBJECTS_COUNT, { propertyName: 'journal', countNumber: response.data.count })
     }
   },
   //Currencies actions

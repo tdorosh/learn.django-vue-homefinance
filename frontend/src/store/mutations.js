@@ -1,8 +1,10 @@
 import {
+  AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
+  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER,
   SET_OBJECTS_COUNT,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
-  SET_JOURNALS,
+  SET_JOURNAL,
   SET_CURRENCIES, ADD_CURRENCY, REMOVE_CURRENCY,
   SET_CATEGORIES, CREATE_CATEGORY, REMOVE_CATEGORY,
   SET_SUBCATEGORIES, CREATE_SUBCATEGORY, REMOVE_SUBCATEGORY,
@@ -10,6 +12,28 @@ import {
 } from './mutation-types.js'
 
 export default {
+  // Auth mutations 
+  [AUTH_REQUEST] (state){
+    state.authStatus = 'loading';
+  },
+  [AUTH_SUCCESS] (state, token){
+    state.authStatus = 'success';
+    state.token = token;
+  },
+  [AUTH_ERROR] (state){
+    state.authStatus = 'error';
+  },
+  [AUTH_LOGOUT] (state){
+    state.authStatus = 'logout';
+    state.token = null;
+  },
+  // User mutations
+  [SET_USER] (state, user) {
+    state.authUser = user;
+  },
+  [CREATE_USER] () {},
+  [UPDATE_USER] () {},
+  [DELETE_USER] () {},
   //Mutation for save objects count
   [SET_OBJECTS_COUNT] (state, payload) {
     const object = state.objectsCount.filter(objectCount => {
@@ -55,8 +79,8 @@ export default {
   },
 
   //Accounts Journals mutations
-  [SET_JOURNALS] (state, journals) {
-    state.journals = journals;
+  [SET_JOURNAL] (state, journal) {
+    state.journal = journal;
   },
 
   //Currencies mutations
