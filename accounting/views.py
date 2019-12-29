@@ -1,10 +1,13 @@
 from decimal import Decimal
 
 from rest_framework import viewsets
+from rest_framework import generics
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
+from accounting.permissions import IsOwner
 from accounting import models
 from accounting import serializers
 from accounting import filters
@@ -12,6 +15,7 @@ from accounting import filters
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = models.Transaction.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.TransactionFilterSet
     search_fields = ['notes',]
@@ -25,6 +29,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return self.serializer_action_class[self.action]
         except (KeyError, AttributeError):
             return super().get_serializer_class()
+
+    def get_queryset(self):
+        return models.Transaction.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
     def create(self, request):
@@ -162,6 +172,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = models.Account.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.AccountFilterSet
     search_fields = ['title',]
@@ -176,25 +187,50 @@ class AccountViewSet(viewsets.ModelViewSet):
         except (KeyError, AttributeError):
             return super().get_serializer_class()
 
-class AccountJournalViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        return models.Account.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class AccountJournalListView(generics.ListAPIView):
     queryset = models.AccountJournal.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.AccountJournalFilterSet
     serializer_class = serializers.AccountJournalSerializer
 
+    def get_queryset(self):
+        return models.AccountJournal.objects.filter(owner=self.request.user)
+
 class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = models.Currency.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     serializer_class = serializers.CurrencySerializer
+
+    def get_queryset(self):
+        return models.Currency.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Category.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.CategoryFilterSet
     search_fields = ['name',]
     serializer_class = serializers.CategorySerializer
 
+    def get_queryset(self):
+        return models.Category.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 class SubcategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Subcategory.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.SubcategoryFilterSet
     search_fields = ['name',]
@@ -209,6 +245,19 @@ class SubcategoryViewSet(viewsets.ModelViewSet):
         except (KeyError, AttributeError):
             return super().get_serializer_class()
 
+    def get_queryset(self):
+        return models.Subcategory.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 class PlaceViewSet(viewsets.ModelViewSet):
     queryset = models.Place.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
     serializer_class = serializers.PlaceSerializer
+
+    def get_queryset(self):
+        return models.Place.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

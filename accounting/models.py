@@ -12,25 +12,14 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=7, decimal_places=2)
     currency = models.ForeignKey('Currency', on_delete=models.CASCADE)
     trans_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
-    category = models.ForeignKey('Category', 
-        on_delete=models.CASCADE, 
-        blank=True, null=True)
-    subcategory = models.ForeignKey('Subcategory', 
-        on_delete=models.CASCADE, 
-        blank=True, null=True)
-    from_account = models.ForeignKey('Account', 
-        related_name="transactions_from_account", 
-        on_delete=models.CASCADE, 
-        blank=True, null=True)
-    on_account = models.ForeignKey('Account', 
-        related_name="transactions_on_account", 
-        on_delete=models.CASCADE, 
-        blank=True, null=True)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, blank=True, null=True)
+    subcategory = models.ForeignKey('Subcategory', on_delete=models.CASCADE, blank=True, null=True)
+    from_account = models.ForeignKey('Account', related_name="transactions_from_account", on_delete=models.CASCADE, blank=True, null=True)
+    on_account = models.ForeignKey('Account', related_name="transactions_on_account", on_delete=models.CASCADE, blank=True, null=True)
     create_datetime = models.DateTimeField(default=timezone.now)
-    place = models.ForeignKey('Place', 
-        on_delete=models.CASCADE, 
-        blank=True, null=True)
+    place = models.ForeignKey('Place', on_delete=models.CASCADE, blank=True, null=True)
     notes = models.TextField(blank=True)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return '{}, {} {}, {}'.format(self.notes, 
@@ -44,9 +33,10 @@ class AccountJournal(models.Model):
     amount_before = models.DecimalField(max_digits=7, decimal_places=2, null=True)
     amount_after = models.DecimalField(max_digits=7, decimal_places=2)
     timestamp = models.DateTimeField(default=timezone.now)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return '{}, {}, {} {}'.format(self.transaction, self.account, self.amount_before, self.amount_after)
+        return '{}, {} {}'.format(self.account, self.amount_before, self.amount_after)
 
 class Account(models.Model):
     title = models.CharField(max_length=20)
@@ -54,6 +44,7 @@ class Account(models.Model):
     currency = models.ForeignKey('Currency', on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
     create_datetime = models.DateTimeField(default=timezone.now)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,7 +53,7 @@ class Account(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.old_amount != self.amount:
-            AccountJournal.objects.create(account=self, amount_before=self.old_amount, amount_after=self.amount)
+            AccountJournal.objects.create(account=self, amount_before=self.old_amount, amount_after=self.amount, owner=self.owner)
 
     def increase(self, sum, currency):
         if self.currency.id == currency:
@@ -86,6 +77,7 @@ class Account(models.Model):
 class Currency(models.Model):
     name = models.CharField(max_length=3)
     full_name = models.CharField(max_length=20)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -94,6 +86,7 @@ class Currency(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=20)
     cat_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -101,6 +94,7 @@ class Category(models.Model):
 class Subcategory(models.Model):
     name = models.CharField(max_length=20)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -108,6 +102,7 @@ class Subcategory(models.Model):
 
 class Place(models.Model):
     name = models.CharField(max_length=50)
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.name)

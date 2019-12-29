@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from accounting import models
 
 class AccoutRepresentationField(serializers.RelatedField):
@@ -9,6 +8,7 @@ class AccoutRepresentationField(serializers.RelatedField):
 class ObjectRepresentationField(serializers.RelatedField):
     def to_representation(self, value):
         return {'id': value.id, 'string_repr': '{}'.format(value.name)}
+
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
