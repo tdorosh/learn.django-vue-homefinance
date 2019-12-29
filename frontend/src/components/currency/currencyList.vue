@@ -4,15 +4,19 @@
       <b-button @click="showCreateModal()" variant="info">Create</b-button>
     <b-row>
       <b-col cols="8">
-        <b-table :items="currencies" :fields="fields" responsive primary-key="id">
-          <template v-slot:cell(actions)="data">
-            <b-button @click="showEditModal(data.item.id)" variant="warning" size="sm">Edit</b-button>&nbsp;
-            <b-button @click="showDeleteModal(data.item.id)" variant="danger" size="sm">Delete</b-button>
-          </template>
-        </b-table>
+        <b-row>
+          <b-table :items="currencies" :fields="fields" responsive primary-key="id">
+            <template v-slot:cell(actions)="data">
+              <b-button @click="showEditModal(data.item.id)" variant="warning" size="sm">Edit</b-button>&nbsp;
+              <b-button @click="showDeleteModal(data.item.id)" variant="danger" size="sm">Delete</b-button>
+            </template>
+          </b-table>
+        </b-row>
+        <b-row>
+          <paginateNav :property="'currencies'" @set-page-request="setPaginationRequest" />
+        </b-row>
       </b-col>
     </b-row>
-    <paginateNav :property="'currencies'" @set-page-request="setPaginationRequest" />
     <b-modal 
       id="currencyForm" 
       :title="modalTitle" 

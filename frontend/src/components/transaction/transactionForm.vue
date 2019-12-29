@@ -10,7 +10,8 @@
                   id="amount" 
                   v-model="form.amount"
                   type="number"
-                  min="0.01"
+                  min=".01"
+                  step=".01"
                   required
                 ></b-form-input>
               </b-form-group>
