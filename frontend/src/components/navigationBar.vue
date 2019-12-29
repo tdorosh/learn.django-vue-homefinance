@@ -3,7 +3,7 @@
     <b-navbar toggleable="lg" type="dark" variant="info">
       <b-navbar-brand :to="{ name: 'home' }">Home Finance</b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-      <b-collapse id="nav-collapse" is-nav>
+      <b-collapse v-if="isAuthenticated" id="nav-collapse" is-nav>
         <b-navbar-nav>
           <b-nav-item-dropdown text="Accounting">
             <b-dropdown-item :to="{ name: 'transactions' }">Transactions</b-dropdown-item>
@@ -26,7 +26,7 @@
 
           <b-nav-item-dropdown text="User" right>
             <b-dropdown-item :to="{ name: 'profile' }">Profile</b-dropdown-item>
-            <b-dropdown-item :to="{ name: 'logout' }">Log out</b-dropdown-item>
+            <b-dropdown-item @click="logout">Logout</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -38,5 +38,18 @@
 
 export default {
   name: 'navigationBar',
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated;
+    }
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('authLogout')
+      .then(() => {
+        this.$router.push('/user/login');
+      });
+    }
+  }
 }
 </script>
