@@ -1,0 +1,1 @@
+web: python ./manage collectstatic && gunicorn backend.wsgi --log-file -
