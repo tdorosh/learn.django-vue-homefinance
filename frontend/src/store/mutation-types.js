@@ -8,6 +8,7 @@ export const SET_USER = 'SET_USER'
 export const CREATE_USER = 'CREATE_USER'
 export const UPDATE_USER = 'UPDATE_USER'
 export const DELETE_USER = 'REMOVE_USER'
+export const CHANGE_USER_PASSWORD = 'CHANGE_USER_PASSWORD'
 //Mutation for save objects count
 export const SET_OBJECTS_COUNT = 'SET_OBJECTS_COUNT'
 //Transactions mutations types

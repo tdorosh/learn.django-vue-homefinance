@@ -1,6 +1,6 @@
 import {
   AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
-  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER,
+  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER, CHANGE_USER_PASSWORD,
   SET_OBJECTS_COUNT,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
@@ -15,25 +15,39 @@ export default {
   // Auth mutations 
   [AUTH_REQUEST] (state){
     state.authStatus = 'loading';
+    state.userEvent = '';
   },
   [AUTH_SUCCESS] (state, token){
     state.authStatus = 'success';
-    state.token = token;
+    state.accessToken = token.access;
+    if (token.refresh) {
+      state.refreshToken = token.refresh;
+    }
   },
   [AUTH_ERROR] (state){
     state.authStatus = 'error';
   },
   [AUTH_LOGOUT] (state){
     state.authStatus = 'logout';
-    state.token = null;
+    state.accessToken = null;
+    state.refreshToken = null;
   },
   // User mutations
   [SET_USER] (state, user) {
     state.authUser = user;
   },
-  [CREATE_USER] () {},
-  [UPDATE_USER] () {},
-  [DELETE_USER] () {},
+  [CREATE_USER] (state) {
+    state.userEvent = 'create';
+  },
+  [UPDATE_USER] (state) {
+    state.userEvent = 'update';
+  },
+  [DELETE_USER] (state) {
+    state.userEvent = 'delete';
+  },
+  [CHANGE_USER_PASSWORD] (state) {
+    state.userEvent = 'change-password';
+  },
   //Mutation for save objects count
   [SET_OBJECTS_COUNT] (state, payload) {
     const object = state.objectsCount.filter(objectCount => {
