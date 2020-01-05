@@ -2,8 +2,11 @@
   <div class="container">
       <h3>Currencies List</h3>
       <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      <b-alert variant="success" :show="showSuccessAlert" dismissible>Currency was added successfully.</b-alert>
+      <b-alert variant="info" :show="showInfoAlert" dismissible>Currency was updated successfully.</b-alert>
+      <b-alert variant="warning" :show="showWarningAlert" dismissible>Currency was deleted successfully.</b-alert>
     <b-row>
-      <b-col cols="8">
+      <b-col cols="6">
         <b-row>
           <b-table :items="currencies" :fields="fields" responsive primary-key="id">
             <template v-slot:cell(actions)="data">
@@ -21,14 +24,18 @@
       id="currencyForm" 
       :title="modalTitle" 
       hide-footer no-close-on-backdrop>
-      <currencyForm :action="action" :currencyId="currencyId"/>
+      <currencyForm 
+        :action="action" 
+        :currencyId="currencyId"
+        @showSuccessAlert="showSuccessAlert=true"
+        @showInfoAlert="showInfoAlert=true"/>
     </b-modal>
     <b-modal 
       id="deleteCurrency" 
       title="Delete Currency" 
       ok-title="Delete" 
       @ok="onDelete(currencyId)">
-      <p>Are you sure to delete the currency?</p>
+      <p>Are you sure you want to delete the currency?</p>
     </b-modal>
   </div>
 </template>
@@ -56,6 +63,9 @@ export default {
           'full_name',
           'actions',
         ],
+        showSuccessAlert: false,
+        showInfoAlert: false,
+        showWarningAlert: false,
     };
   },
   computed: {
@@ -66,6 +76,9 @@ export default {
   methods: {
     onDelete(currencyId) {
       this.$store.dispatch('deleteCurrency', currencyId)
+        .then(() => {
+          this.showWarningAlert=true;
+        })
     },
     showCreateModal() {
       this.action = 'create';

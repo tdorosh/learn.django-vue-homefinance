@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <b-alert v-if="eventError" v-model="eventError" variant="danger" dismissible>{{ eventError }}</b-alert>
     <b-row>
       <b-col cols="12">
         <b-form @submit="onSubmit">
@@ -32,7 +33,7 @@
                   id="trans_type" 
                   v-model="form.trans_type"
                   :options="transactionTypes"
-                  @change="setNullAccounts()"
+                  @change="setNullAccountsSubcat()"
                   required
                 ></b-form-select>
               </b-form-group>
@@ -133,7 +134,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets } from '@/utils.js';
+import { getTargets, convertDateToISOString } from '@/utils.js';
 
 export default {
   name: 'transactionForm',
@@ -164,6 +165,7 @@ export default {
       options: {
         format: 'DD.MM.YYYY, HH:mm:ss',
       },
+      eventError: '',
     }
   },
   computed: {
@@ -184,7 +186,7 @@ export default {
             subcategory: this.form.subcategory,
             from_account: this.form.from_account,
             on_account: this.form.on_account,
-            create_datetime: this.form.create_datetime,
+            create_datetime: convertDateToISOString(this.form.create_datetime),
             place: this.form.place,
             notes: this.form.notes,
           };
@@ -193,8 +195,10 @@ export default {
           .then(() => {
             this.$store.dispatch('getTransactions');
             this.$bvModal.hide('transactionForm');
+            this.$emit('showSuccessAlert');
+          }, (error) => {
+            this.eventError = error.response.data;
           });
-                
       } else if (this.action === 'update') {
           const transactionData = {
             id: this.transactionId,
@@ -206,7 +210,7 @@ export default {
               subcategory: this.form.subcategory,
               from_account: this.form.from_account,
               on_account: this.form.on_account,
-              create_datetime: this.form.create_datetime,
+              create_datetime: convertDateToISOString(this.form.create_datetime),
               place: this.form.place,
               notes: this.form.notes,
             },
@@ -215,6 +219,9 @@ export default {
             .then(() => {
               this.$store.dispatch('getTransactions');
               this.$bvModal.hide('transactionForm');
+              this.$emit('showInfoAlert');
+            }, (error) => {
+                this.eventError = error.response.data;
             }); 
           }
         },
@@ -239,6 +246,7 @@ export default {
         }  
     },
     getTargets: getTargets,
+    convertDateToISOString: convertDateToISOString,
     getFilterAccounts(currencyId) {
       if (currencyId) {
         const currency = this.currencies.filter(currency => {
@@ -263,13 +271,14 @@ export default {
     getFilterSubcategories(category) {
       if (category) {
         return this.subcategories.filter(subcategory => {
-          return subcategory.category === category;
+          return subcategory.category.id === category;
       });
       } else {
         return this.subcategories;
       }
     },
-    setNullAccounts() {
+    setNullAccountsSubcat() {
+      this.form.subcategory = null;
       if (this.form.trans_type === 'INC') {
         this.form.from_account = null;
       } else if (this.form.trans_type === 'EXP') {
@@ -293,11 +302,11 @@ export default {
   },
   beforeMount() {
     //Get data for selects from api
-    this.$store.dispatch('getAccounts');
-    this.$store.dispatch('getCurrencies');
-    this.$store.dispatch('getCategories');
-    this.$store.dispatch('getSubcategories');
-    this.$store.dispatch('getPlaces');
+    this.$store.dispatch('getAccounts', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getCurrencies', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getSubcategories', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getPlaces', { params: {'get_all': 'true'}});
     this.updateFormData();
   }
 }

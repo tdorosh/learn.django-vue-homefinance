@@ -49,7 +49,7 @@ export default {
       .then(() => {
         this.$router.push('/user/login');
       });
-    }
+    },
   }
 }
 </script>

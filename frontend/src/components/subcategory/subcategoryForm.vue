@@ -57,6 +57,7 @@ export default {
           .then(() => {
             this.$store.dispatch('getSubcategories');
             this.$bvModal.hide('subcategoryForm');
+            this.$emit('showSuccessAlert');
           });
                 
       } else if (this.action === 'update') {
@@ -71,6 +72,7 @@ export default {
             .then(() => {
               this.$store.dispatch('getSubcategories');
               this.$bvModal.hide('subcategoryForm');
+              this.$emit('showInfoAlert');
             }); 
           }
         },
@@ -88,7 +90,7 @@ export default {
     getTargets: getTargets,
   },
   beforeMount() {
-    this.$store.dispatch('getCategories');
+    this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
     this.updateFormData();
   }
 }

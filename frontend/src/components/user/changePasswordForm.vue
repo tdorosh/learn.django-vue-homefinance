@@ -1,5 +1,6 @@
 <template>
   <div>
+    <b-alert show variant="info">Password changing will require re-authentication</b-alert>
     <b-form @submit.prevent="onSubmit">
       <b-form-group label="Old Password" label-for="old-password">
         <b-form-input
@@ -9,6 +10,10 @@
           placeholder="Your old password"
           required
         ></b-form-input>
+        <b-list-group v-if="oldPasswordError">
+          <b-list-group-item variant="danger"> {{ oldPasswordError }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="New Password" label-for="new-password">
@@ -19,6 +24,14 @@
           placeholder="Your new password"
           required
         ></b-form-input>
+        <b-list-group v-if="newPasswordErrors">
+          <b-list-group-item 
+            v-for="error in passwordErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="Confirm New Password" label-for="confirm-new-password">
@@ -29,9 +42,10 @@
           placeholder="Confirm your new password here"
           required
         ></b-form-input>
+        <p v-if="!isPasswordsEqual()" class="alert alert-danger">Passwords must be the same</p>
       </b-form-group>
 
-      <b-button type="submit" variant="primary">Change password</b-button>&nbsp;
+      <b-button type="submit" variant="primary" :disabled="!isPasswordsEqual()">Change password</b-button>&nbsp;
       <b-button @click="$bvModal.hide('changePasswordForm')">Cancel</b-button>
 
     </b-form>
@@ -40,10 +54,6 @@
 
 <script>
 
-import axiosInstance from '@/axios.js'
-
-const HTTP = axiosInstance;
-
 export default {
   name: 'changePasswordForm',
   data() {
@@ -51,6 +61,8 @@ export default {
       old_password: '',
       new_password: '',
       confirm_new_password: '',
+      oldPasswordError: '',
+      newPasswordErrors: '',
     }
   },
   computed: {
@@ -61,24 +73,24 @@ export default {
   methods: {
     onSubmit() {
       const data = {
-          old_password: this.old_password,
-          new_password: this.new_password,
+        old_password: this.old_password,
+        new_password: this.new_password,
       };
-      return new Promise((resolve, reject) => {
-        HTTP.put('users/profile/change-password/', data)
-        .then((response) => {
+      this.$store.dispatch('changePassword', data)
+        .then(() => {
           this.$bvModal.hide('changePasswordForm');
           this.$store.dispatch('authLogout')
             .then(() => {
               this.$router.push('/user/login');
-            })
-            resolve(response)
+          })
+        }, (error) => {
+            this.oldPasswordError = error.response.data.old_password[0];
+            this.newPasswordErrors = error.response.data.new_password;
         })
-        .catch((err) => {
-          reject(err)
-        })
-      })
     },
+    isPasswordsEqual() {
+      return this.confirm_new_password === this.new_password;
+    }
   },
 }
 </script>

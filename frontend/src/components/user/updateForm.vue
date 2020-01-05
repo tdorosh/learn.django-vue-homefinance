@@ -1,5 +1,6 @@
 <template>
   <div>
+    <b-alert show variant="info">Profile updating will require re-authentication</b-alert>
     <b-form class="form" @submit.prevent="onSubmit">
       <b-form-group label="Username" label-for="username">
         <b-form-input
@@ -8,6 +9,14 @@
           type="text"
           required
         ></b-form-input>
+        <b-list-group v-if="usernameErrors">
+          <b-list-group-item 
+            v-for="error in usernameErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="Email" label-for="email">
@@ -17,6 +26,14 @@
           type="email"
           required
         ></b-form-input>
+        <b-list-group v-if="emailErrors">
+          <b-list-group-item 
+            v-for="error in emailErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-button type="submit" variant="primary">Update data</b-button>&nbsp;
@@ -35,6 +52,8 @@ export default {
     return {
       username: '',
       email: '',
+      usernameErrors: '',
+      emailErrors: '',
     }
   },
   computed: {
@@ -56,8 +75,15 @@ export default {
         this.$store.dispatch('getUser')
         .then(() => {
           this.$bvModal.hide('updateUserForm');
+          this.$store.dispatch('authLogout')
+					.then(() => {
+            this.$router.push('/user/login');
+					})
         })
-      });
+      }, (error) => {
+          this.usernameErrors = error.response.data.username;
+          this.emailErrors = error.response.data.email;
+        });
     },
     updateFormData() {
       this.username = this.authUser.username;

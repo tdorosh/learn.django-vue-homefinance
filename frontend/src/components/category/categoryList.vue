@@ -2,6 +2,9 @@
   <div class="container">
       <h3>Categories List</h3>
       <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      <b-alert variant="success" :show="showSuccessAlert" dismissible>Category was created successfully.</b-alert>
+      <b-alert variant="info" :show="showInfoAlert" dismissible>Category was updated successfully.</b-alert>
+      <b-alert variant="warning" :show="showWarningAlert" dismissible>Category was deleted successfully.</b-alert>
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -27,14 +30,18 @@
       id="categoryForm" 
       :title="modalTitle" 
       hide-footer no-close-on-backdrop>
-      <categoryForm :action="action" :categoryId="categoryId"/>
+      <categoryForm 
+        :action="action" 
+        :categoryId="categoryId"
+        @showSuccessAlert="showSuccessAlert=true"
+        @showInfoAlert="showInfoAlert=true"/>
     </b-modal>
     <b-modal 
       id="deleteCategory" 
       title="Delete Category" 
       ok-title="Delete" 
       @ok="onDelete(categoryId)">
-      <p>Are you sure to delete the category?</p>
+      <p>Are you sure you want to delete the category?</p>
     </b-modal>
   </div>
 </template>
@@ -64,6 +71,9 @@ export default {
           {key: 'cat_type', label: 'Category Type'},
           'actions',
         ],
+        showSuccessAlert: false,
+        showInfoAlert: false,
+        showWarningAlert: false,
     };
   },
   computed: {
@@ -74,6 +84,9 @@ export default {
   methods: {
     onDelete(categoryId) {
       this.$store.dispatch('deleteCategory', categoryId)
+        .then(() => {
+          this.showWarningAlert=true;
+        })
     },
     showCreateModal() {
       this.action = 'create';

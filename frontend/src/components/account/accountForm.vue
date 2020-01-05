@@ -61,7 +61,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets } from '@/utils.js';
+import { getTargets, convertDateToISOString } from '@/utils.js';
 
 export default {
   name: 'accountForm',
@@ -97,13 +97,14 @@ export default {
             amount: this.form.amount,
             currency: this.form.currency,
             notes: this.form.notes,
-            create_datetime: this.form.create_datetime,
+            create_datetime: convertDateToISOString(this.form.create_datetime),
           };
 
         this.$store.dispatch('createAccount', data)
           .then(() => {
             this.$store.dispatch('getAccounts');
             this.$bvModal.hide('accountForm');
+            this.$emit('showSuccessAlert');
           });
                 
       } else if (this.action === 'update') {
@@ -114,13 +115,14 @@ export default {
               amount: this.form.amount,
               currency: this.form.currency,
               notes: this.form.notes,
-              create_datetime: this.form.create_datetime,
+              create_datetime: convertDateToISOString(this.form.create_datetime),
             },
           };
           this.$store.dispatch('updateAccount', accountData)
             .then(() => {
               this.$store.dispatch('getAccounts');
               this.$bvModal.hide('accountForm');
+              this.$emit('showInfoAlert');
             }); 
           }
         },
@@ -143,7 +145,7 @@ export default {
   },
   beforeMount() {
     //Get data for selects from api
-    this.$store.dispatch('getCurrencies');
+    this.$store.dispatch('getCurrencies', { params: {'get_all': 'true'}});
     this.updateFormData();
   }
 }

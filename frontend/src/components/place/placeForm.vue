@@ -40,6 +40,7 @@ export default {
           .then(() => {
             this.$store.dispatch('getPlaces');
             this.$bvModal.hide('placeForm');
+            this.$emit('showSuccessAlert');
           });
                 
       } else if (this.action === 'update') {
@@ -53,6 +54,7 @@ export default {
             .then(() => {
               this.$store.dispatch('getPlaces');
               this.$bvModal.hide('placeForm');
+              this.$emit('showInfoAlert');
             }); 
           }
         },

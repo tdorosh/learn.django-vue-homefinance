@@ -2,6 +2,9 @@
   <div class="container">
       <h3>Subcategories List</h3>
       <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      <b-alert variant="success" :show="showSuccessAlert" dismissible>Subcategory was created successfully.</b-alert>
+      <b-alert variant="info" :show="showInfoAlert" dismissible>Subcategory was updated successfully.</b-alert>
+      <b-alert variant="warning" :show="showWarningAlert" dismissible>Subcategory was deleted successfully.</b-alert>
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -24,14 +27,18 @@
       id="subcategoryForm" 
       :title="modalTitle" 
       hide-footer no-close-on-backdrop>
-      <subcategoryForm :action="action" :subcategoryId="subcategoryId"/>
+      <subcategoryForm 
+        :action="action" 
+        :subcategoryId="subcategoryId"
+        @showSuccessAlert="showSuccessAlert=true"
+        @showInfoAlert="showInfoAlert=true"/>
     </b-modal>
     <b-modal 
       id="deleteSubcategory" 
       title="Delete Subcategory" 
       ok-title="Delete" 
       @ok="onDelete(subcategoryId)">
-      <p>Are you sure to delete the subcategory?</p>
+      <p>Are you sure you want to delete the subcategory?</p>
     </b-modal>
   </div>
 </template>
@@ -59,6 +66,9 @@ export default {
           'category',
           'actions',
         ],
+        showSuccessAlert: false,
+        showInfoAlert: false,
+        showWarningAlert: false,
     };
   },
   computed: {
@@ -79,6 +89,9 @@ export default {
   methods: {
     onDelete(subcategoryId) {
       this.$store.dispatch('deleteSubcategory', subcategoryId)
+        .then(() => {
+          this.showWarningAlert=true;
+        })
     },
     showCreateModal() {
       this.action = 'create';

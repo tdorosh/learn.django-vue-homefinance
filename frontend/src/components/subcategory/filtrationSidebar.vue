@@ -89,7 +89,7 @@ export default {
     getTargets: getTargets,
   },
   beforeMount() {
-    this.$store.dispatch('getCategories');
+    this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
   },
 }
 </script>

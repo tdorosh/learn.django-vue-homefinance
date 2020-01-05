@@ -85,7 +85,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets } from '@/utils.js';
+import { getTargets, convertDateToISOString } from '@/utils.js';
 
 export default {
   name: 'filtrationSidebar',
@@ -118,7 +118,7 @@ export default {
         from_amount: this.form.from_amount,
         to_amount: this.form.to_amount,
         currency: this.form.currency,
-        create_datetime: this.form.create_datetime,
+        create_datetime: convertDateToISOString(this.form.create_datetime),
       }}
       this.$store.dispatch('getAccounts', params);
     },
@@ -140,7 +140,7 @@ export default {
     getTargets: getTargets,
   },
   beforeMount() {
-    this.$store.dispatch('getCurrencies');
+    this.$store.dispatch('getCurrencies', { params: {'get_all': 'true'}});
   }
 }
 </script>

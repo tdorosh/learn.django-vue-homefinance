@@ -57,6 +57,7 @@ export default {
           .then(() => {
             this.$store.dispatch('getCategories');
             this.$bvModal.hide('categoryForm');
+            this.$emit('showSuccessAlert');
           });
                 
       } else if (this.action === 'update') {
@@ -71,6 +72,7 @@ export default {
             .then(() => {
               this.$store.dispatch('getCategories');
               this.$bvModal.hide('categoryForm');
+              this.$emit('showInfoAlert');
             }); 
           }
         },

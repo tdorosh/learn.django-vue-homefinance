@@ -1,21 +1,28 @@
 <template>
-  <div>
-		<b-table-simple>
-			<b-tbody>
-				<b-tr>
-					<b-th>Username</b-th>
-					<b-td>{{ authUser.username }}</b-td>
-				</b-tr>
-				<b-tr>
-					<b-th>Email</b-th>
-					<b-td>{{ authUser.email }}</b-td>
-				</b-tr>
-			</b-tbody>
-		</b-table-simple>
-
-		<b-button @click="showUpdateUserForm" variant="outline-primary">Update User</b-button>&nbsp;
-    <b-button @click="showChangePasswordForm" variant="warning">Change password</b-button>&nbsp;
-		<b-button @click="showConfirmDeleteUser" variant="danger">Delete User</b-button>&nbsp;
+  <div class="container">
+    <b-row>
+      <b-col cols=6>
+        <b-table-simple>
+          <b-tbody>
+            <b-tr>
+              <b-th>Username</b-th>
+              <b-td>{{ authUser.username }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-th>Email</b-th>
+              <b-td>{{ authUser.email }}</b-td>
+            </b-tr>
+          </b-tbody>
+        </b-table-simple>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols=6>
+        <b-button @click="showUpdateUserForm" variant="outline-primary">Update User</b-button>&nbsp;
+        <b-button @click="showChangePasswordForm" variant="warning">Change password</b-button>&nbsp;
+        <b-button @click="showConfirmDeleteUser" variant="danger">Delete User</b-button>&nbsp;
+      </b-col>
+    </b-row>
 
 		<b-modal 
       id="updateUserForm" 
@@ -70,7 +77,7 @@ export default {
 				this.$bvModal.hide('deleteUser');
 				this.$store.dispatch('authLogout')
 					.then(() => {
-						this.$router.push('/user/login');
+            this.$router.push('/user/login');
 					})
 			})
 		},
@@ -83,6 +90,9 @@ export default {
 		showConfirmDeleteUser() {
 			this.$bvModal.show('deleteUser');
 		},
-	},
+  },
+  beforeMount(){
+    this.$store.dispatch('getUser');
+  },
 }
 </script>

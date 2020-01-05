@@ -2,6 +2,9 @@
   <div class="container">
     <h3>Transactions List</h3>
     <b-button @click="showCreateModal()" variant="info">Create</b-button>
+    <b-alert variant="success" :show="showSuccessAlert" dismissible>Transaction was created successfully.</b-alert>
+    <b-alert variant="info" :show="showInfoAlert" dismissible>Transaction was updated successfully.</b-alert>
+    <b-alert variant="warning" :show="showWarningAlert" dismissible>Transaction was deleted successfully.</b-alert>
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -10,7 +13,7 @@
               <p>{{ getCategory(data.value) }}</p>
             </template>
             <template v-slot:cell(create_datetime)="data">
-              <p>{{ new Date(data.value) }}</p>
+              <p>{{ getDate(data.value) }}</p>
             </template>
             <template v-slot:cell(actions)="data">
               <b-button @click="showEditModal(data.item.id)" variant="warning" size="sm">Edit</b-button>&nbsp;
@@ -30,19 +33,32 @@
       id="transactionForm" 
       :title="modalTitle" 
       hide-footer no-close-on-backdrop>
-      <transactionForm :action="action" :transactionId="transactionId"/>
+      <transactionForm 
+        :action="action" 
+        :transactionId="transactionId" 
+        @showSuccessAlert="showSuccessAlert=true"
+        @showInfoAlert="showInfoAlert=true"/>
     </b-modal>
     <b-modal 
       id="deleteTransaction" 
       title="Delete Transaction" 
       ok-title="Delete" 
-      @ok="onDelete(transactionId)">
-      <p>Are you sure to delete the transaction?</p>
+      @ok.prevent="onDelete(transactionId)">
+      <b-alert 
+        v-if="eventError" 
+        v-model="eventError" 
+        variant="danger" 
+        dismissible>
+        {{ eventError }}
+      </b-alert>
+      <p>Are you sure you want to delete the transaction?</p>
     </b-modal>
   </div>
 </template>
 
 <script>
+
+import { getDate } from '@/utils.js';
 
 import transactionForm from '@/components/transaction/transactionForm.vue';
 import filtrationSidebar from '@/components/transaction/filtrationSidebar.vue';
@@ -60,6 +76,9 @@ export default {
       transactionId: null,
         action: '',
         modalTitle: '',
+        showSuccessAlert: false,
+        showInfoAlert: false,
+        showWarningAlert: false,
         fields: [
           'amount',
           'currency',
@@ -73,6 +92,7 @@ export default {
           'notes',
           'actions',
         ],
+        eventError: null,
       };
   },
   computed: {
@@ -117,7 +137,12 @@ export default {
     onDelete(transactionId) {
       this.$store.dispatch('deleteTransaction', transactionId)
       .then(() => {
-        this.$store.dispatch('getTransactions')
+        this.$store.dispatch('getTransactions');
+        this.$bvModal.hide('deleteTransaction');
+        this.showWarningAlert=true;
+
+      }, (error) => {
+        this.eventError = error.response.data;
       })
     },
     showCreateModal() {
@@ -133,6 +158,7 @@ export default {
     },
     showDeleteModal(transactionId) {
       this.transactionId = transactionId;
+      this.eventError = null;
       this.$bvModal.show('deleteTransaction');
     },
     getCategory(cat_value) {
@@ -150,6 +176,7 @@ export default {
       }};
       this.$store.dispatch('getTransactions', params);
     },
+    getDate: getDate,
   },
   beforeMount() {
     this.$store.dispatch('getTransactions');

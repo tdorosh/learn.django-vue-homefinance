@@ -51,6 +51,7 @@ export default {
           .then(() => {
             this.$store.dispatch('getCurrencies');
             this.$bvModal.hide('currencyForm');
+            this.$emit('showSuccessAlert');
           });
                 
       } else if (this.action === 'update') {
@@ -65,6 +66,7 @@ export default {
             .then(() => {
               this.$store.dispatch('getCurrencies');
               this.$bvModal.hide('currencyForm');
+              this.$emit('showInfoAlert');
             }); 
           }
         },

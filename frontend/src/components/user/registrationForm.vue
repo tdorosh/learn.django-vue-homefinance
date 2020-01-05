@@ -9,7 +9,14 @@
           placeholder="Your username"
           required
         ></b-form-input>
-        <b-link @click.prevent="checkUsername">Check</b-link>
+        <b-list-group v-if="usernameErrors">
+          <b-list-group-item 
+            v-for="error in usernameErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="Email" label-for="email">
@@ -20,7 +27,14 @@
           placeholder="Your email"
           required
         ></b-form-input>
-        <b-link @click.prevent="checkEmail">Check</b-link>
+        <b-list-group v-if="emailErrors">
+          <b-list-group-item 
+            v-for="error in emailErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="Password" label-for="password">
@@ -31,6 +45,14 @@
           placeholder="Your password"
           required
         ></b-form-input>
+        <b-list-group v-if="passwordErrors">
+          <b-list-group-item 
+            v-for="error in passwordErrors"
+            v-bind:key="error.id"
+            variant="danger">
+            {{ error }}
+          </b-list-group-item>
+        </b-list-group>
       </b-form-group>
 
       <b-form-group label="Confirm Password" label-for="confirm-password">
@@ -39,13 +61,12 @@
           v-model="confirm_password"
           type="password"
           placeholder="Confirm your password here"
-          @change="checkPasswordsEqual()"
           required
         ></b-form-input>
-        <p v-if="!checkPasswordsEqual()">Passwords must be equal</p>
+        <p v-if="!isPasswordsEqual()" class="alert alert-danger">Passwords must be the same</p>
       </b-form-group>
 
-      <b-button type="submit" variant="primary">Register</b-button>&nbsp;
+      <b-button type="submit" variant="primary" :disabled="!isPasswordsEqual()">Register</b-button>&nbsp;
       <b-button @click="$bvModal.hide('registrationForm')">Cancel</b-button>
 
     </b-form>
@@ -62,6 +83,9 @@ export default {
       email: '',
       password: '',
       confirm_password: '',
+      usernameErrors: '',
+      emailErrors: '',
+      passwordErrors:'',
     }
   },
   methods: {
@@ -74,15 +98,14 @@ export default {
       this.$store.dispatch('createUser', data)
       .then(() => {
         this.$bvModal.hide('registrationForm');
+        this.$emit('showSuccessAlert');
+      }, (error) => {
+          this.usernameErrors = error.response.data.username;
+          this.emailErrors = error.response.data.email;
+          this.passwordErrors = error.response.data.password;
       });
-    }, 
-    checkUsername() {
     },
-    checkEmail() {
-    },
-    checkPassword() {
-    },
-    checkPasswordsEqual() {
+    isPasswordsEqual() {
       return this.confirm_password === this.password;
     }
   },

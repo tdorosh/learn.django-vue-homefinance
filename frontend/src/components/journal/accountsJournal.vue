@@ -2,11 +2,11 @@
   <div class="container">
       <h3>Accounts Journal</h3>
     <b-row>
-      <b-col cols="9">
+      <b-col cols="7">
         <b-row>
           <b-table :items="journal" :fields="fields" responsive primary-key="id">
             <template v-slot:cell(timestamp)="data">
-              <p>{{ new Date(data.value) }}</p>
+              <p>{{ getDate(data.value) }}</p>
             </template>
           </b-table>
         </b-row>
@@ -24,6 +24,7 @@
 <script>
 
 import { mapGetters } from 'vuex';
+import { getDate } from '@/utils.js';
 
 import filtrationSidebar from '@/components/journal/filtrationSidebar.vue';
 import paginateNav from '@/components/paginate.vue';
@@ -74,6 +75,7 @@ export default {
       }};
       this.$store.dispatch('getJournal', params);
     },
+    getDate: getDate,
   },
 
   beforeMount() {

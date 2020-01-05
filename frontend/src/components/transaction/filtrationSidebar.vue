@@ -61,7 +61,7 @@
                   id="trans_type"
                   v-model="form.trans_type"
                   :options="transactionTypes"
-                  @change="setNullAccounts()"
+                  @change="setNullAccountsSubcat()"
                 ></b-form-select>
               </b-form-group>
             </b-col>
@@ -151,7 +151,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets } from '@/utils.js';
+import { getTargets, convertDateToISOString } from '@/utils.js';
 
 export default {
   name: 'filtrationSidebar',
@@ -202,7 +202,7 @@ export default {
         subcategory: this.form.subcategory,
         from_account: this.form.from_account,
         on_account: this.form.on_account,
-        create_datetime: this.form.create_datetime,
+        create_datetime: convertDateToISOString(this.form.create_datetime),
         place: this.form.place,
       }}
       this.$store.dispatch('getTransactions', params);
@@ -259,7 +259,8 @@ export default {
         return this.subcategories;
       }
     },
-    setNullAccounts() {
+    setNullAccountsSubcat() {
+      this.form.subcategory = null;
       if (this.form.trans_type === 'INC') {
         this.form.from_account = null;
       } else if (this.form.trans_type === 'EXP') {
@@ -269,11 +270,11 @@ export default {
   },
   beforeMount() {
     //Get data for selects from api
-    this.$store.dispatch('getAccounts');
-    this.$store.dispatch('getCurrencies');
-    this.$store.dispatch('getCategories', { params: {no_page: 'yes'}});
-    this.$store.dispatch('getSubcategories');
-    this.$store.dispatch('getPlaces');
+    this.$store.dispatch('getAccounts', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getCurrencies', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getSubcategories', { params: {'get_all': 'true'}});
+    this.$store.dispatch('getPlaces', { params: {'get_all': 'true'}});
   },
 }
 </script>

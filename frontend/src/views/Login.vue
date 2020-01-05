@@ -1,9 +1,36 @@
 <template>
   <div class="container text-center bv-example-row bv-example-row-flex-cols">
     <b-row class="mt-5" align-h="center">
+      <b-alert 
+        variant="success" 
+        :show="showSuccessAlert" 
+        dismissible>
+        New user was created successfully.
+        Now you can sign in with your login and password.
+      </b-alert>
+      <b-alert 
+        variant="info" 
+        :show="isUpdated"
+        dismissible>
+        User was updated successfully.
+      </b-alert>
+      <b-alert 
+        variant="warning" 
+        :show="isDeleted"
+        dismissible>
+        User and data was deleted successfully.
+      </b-alert>
+      <b-alert 
+        variant="info" 
+        :show="isPasswordChanged"
+        dismissible>
+        Password was changed successfully.
+      </b-alert>
+    </b-row>
+    <b-row class="mt-5" align-h="center">
       <b-form @submit.prevent="login">
         <h3>Login</h3>
-        <div v-if="isError" class="alert alert-danger" role="alert">Authentication error</div>
+        <b-alert :show="isError" variant="warning" dismissible>Authentication error</b-alert>
         <b-form-group class="text-left" label="Username" label-for="username" >
           <b-form-input
             id="username"
@@ -29,7 +56,7 @@
       id="registrationForm" 
       title="Register a new user" 
       hide-footer no-close-on-backdrop>
-      <registrationForm />
+      <registrationForm @showSuccessAlert="showSuccessAlert=true" />
     </b-modal>
   </div>
 </template>
@@ -46,11 +73,22 @@ export default {
     return {
       username: '',
       password: '',
+      showSuccessAlert: false,
+      showInfoAlert: false,
     }
   },
   computed: {
     isError() {
       return this.$store.getters.authStatus === 'error';
+    },
+    isDeleted() {
+      return this.$store.getters.userEvent === 'delete';
+    },
+    isUpdated() {
+      return this.$store.getters.userEvent === 'update';
+    },
+    isPasswordChanged() {
+      return this.$store.getters.userEvent === 'change-pasword';
     },
   },
   methods: {
@@ -58,7 +96,6 @@ export default {
       const { username, password } = this;
       this.$store.dispatch('authRequest', { username, password })
       .then(() => {
-        this.$store.dispatch('getUser');
         this.$router.push('/home');
       });
     },
