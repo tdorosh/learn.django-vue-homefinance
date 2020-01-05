@@ -10,7 +10,7 @@ const accountList = () => import(/* */ '@/components/account/accountList.vue')
 const accountsJournal = () => import(/* */ '@/components/journal/accountsJournal.vue')
 const currencyList = () => import(/* */ '@/components/currency/currencyList.vue')
 const categoryList = () => import(/* */ '@/components/category/categoryList.vue')
-const subcategoryList = () => import(/* */ '@/components/subcategory/subcategoryList.vue')
+const subcategoryList = () => import(/**/ '@/components/subcategory/subcategoryList.vue')
 const placeList = () => import(/* */ '@/components/place/placeList.vue')
 
 Vue.use(VueRouter)

@@ -1,6 +1,6 @@
 import {
   AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
-  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER,
+  SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER, CHANGE_USER_PASSWORD,
   SET_OBJECTS_COUNT,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
@@ -23,15 +23,36 @@ const actions = {
       commit(AUTH_REQUEST);
       HTTP.post('api/token/', data)
       .then((response) => {
-        const token = response.data.access;
-        localStorage.setItem('user-token', token);
-        axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
+        const token = response.data;
+        localStorage.setItem('user-token', token.access);
+        localStorage.setItem('user-refresh-token', token.refresh);
+        axiosInstance.defaults.headers.common.Authorization = `Bearer ${token.access}`;
         commit(AUTH_SUCCESS, token);
         resolve(response);
       })
       .catch((err) => {
         commit(AUTH_ERROR);
         localStorage.removeItem('user-token');
+        localStorage.removeItem('user-refresh-token');
+        reject(err);
+      });
+    });
+  },
+  refreshAuthRequest({ commit}, data) {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_REQUEST);
+      HTTP.post('api/token/refresh/', data)
+      .then((response) => {
+        const token = response.data;
+        localStorage.setItem('user-token', token.access);
+        axiosInstance.defaults.headers.common.Authorization = `Bearer ${token.access}`;
+        commit(AUTH_SUCCESS, token);
+        resolve(response);
+      })
+      .catch((err) => {
+        commit(AUTH_ERROR);
+        localStorage.removeItem('user-token');
+        localStorage.removeItem('user-refresh-token');
         reject(err);
       });
     });
@@ -40,6 +61,7 @@ const actions = {
     return new Promise((resolve) => {
       commit(AUTH_LOGOUT);
       localStorage.removeItem('user-token');
+      localStorage.removeItem('user-refresh-token');
       delete axiosInstance.defaults.headers.common.Authorization;
       resolve();
     })
@@ -67,6 +89,12 @@ const actions = {
     const response = await HTTP.delete(`users/profile/${userId}/`);
     if (response.status === 204) {
       commit(DELETE_USER);
+    }
+  },
+  async changePassword({ commit }, data) {
+    const response = await HTTP.put('users/profile/change-password/', data);
+    if (response.status === 200) {
+      commit(CHANGE_USER_PASSWORD)
     }
   },
   //Transactions actions
@@ -106,7 +134,7 @@ const actions = {
   async getAccounts ({ commit }, params) {
     const response = await HTTP.get('accounts/', params);
     if (response.status === 200) {
-      commit(SET_ACCOUNTS, response.data.results);
+      commit(SET_ACCOUNTS, response.data.results || response.data);
       commit(SET_OBJECTS_COUNT, { propertyName: 'accounts', countNumber: response.data.count })
     }
   },
@@ -146,7 +174,7 @@ const actions = {
   async getCurrencies ({ commit }, params) {
     const response = await HTTP.get('currencies/', params);
     if (response.status === 200) {
-      commit(SET_CURRENCIES, response.data.results);
+      commit(SET_CURRENCIES, response.data.results || response.data);
       commit(SET_OBJECTS_COUNT, { propertyName: 'currencies', countNumber: response.data.count })
     }
   },
@@ -172,7 +200,7 @@ const actions = {
   async getCategories ({ commit }, params) {
     const response = await HTTP.get('categories/', params);
     if (response.status === 200) {
-      commit(SET_CATEGORIES, response.data.results);
+      commit(SET_CATEGORIES, response.data.results || response.data);
       commit(SET_OBJECTS_COUNT, { propertyName: 'categories', countNumber: response.data.count })
     }
   },
@@ -198,7 +226,7 @@ const actions = {
   async getSubcategories ({ commit }, params) {
     const response = await HTTP.get('subcategories/', params);
     if (response.status === 200) {
-      commit(SET_SUBCATEGORIES, response.data.results);
+      commit(SET_SUBCATEGORIES, response.data.results || response.data);
       commit(SET_OBJECTS_COUNT, { propertyName: 'subcategories', countNumber: response.data.count })
     }
   },
@@ -225,7 +253,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       HTTP.get('places/', params)
         .then((response) => {
-          commit(SET_PLACES, response.data.results);
+          commit(SET_PLACES, response.data.results || response.data);
           commit(SET_OBJECTS_COUNT, { propertyName: 'places', countNumber: response.data.count })
           resolve(response);
         })
@@ -248,7 +276,7 @@ const actions = {
   },
   updatePlace ({ dispatch }, placeData) {
     return new Promise((resolve, reject) => {
-      HTTP.put(`places/${placeData.id}`, placeData.data)
+      HTTP.put(`places/${placeData.id}/`, placeData.data)
         .then((response) => {
           dispatch('getPlaces');
           resolve(response);
@@ -260,7 +288,7 @@ const actions = {
   },
   deletePlace ({ commit }, placeId) {
     return new Promise((resolve, reject) => {
-      HTTP.delete(`places/${placeId}`)
+      HTTP.delete(`places/${placeId}/`)
         .then((response) => {
           commit(REMOVE_PLACE, placeId);
           resolve(response);

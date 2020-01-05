@@ -10,8 +10,10 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     authUser: null,
-    token: localStorage.getItem('user-token') || '',
+    accessToken: localStorage.getItem('user-token') || '',
+    refreshToken: localStorage.getItem('user-refresh-token') || '',
     authStatus: 'wait',
+    userEvent: '',
     objectsCount: [
       { transactions: null },
       { accounts: null },
@@ -33,8 +35,9 @@ export default new Vuex.Store({
   },
   getters: {
     authUser: state => state.authUser,
-    isAuthenticated: state => !!state.token,
+    isAuthenticated: state => !!state.accessToken,
     authStatus: state => state.authStatus,
+    userEvent: state => state.userEvent,
     objectsCount: state => state.objectsCount,
     transactions: state => state.transactions,
     transaction: state => state.transaction,
