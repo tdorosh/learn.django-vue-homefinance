@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
+from accounting.pagination import Unpaginated
 from accounting.permissions import IsOwner
 from accounting import models
 from accounting import serializers
@@ -31,7 +32,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
     def get_queryset(self):
-        return models.Transaction.objects.filter(owner=self.request.user)
+        return models.Transaction.objects.filter(owner=self.request.user).order_by('create_datetime')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -86,18 +87,33 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
             if transaction_from_account.id == request_from_account.id:
                 amount_diff = request_amount - transaction.amount
-                request_from_account.decrease(amount_diff, request_currency)
+                try:
+                    request_from_account.decrease(amount_diff, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
             else:
-                transaction_from_account.increase(transaction.amount, transaction.currency.id)
-                request_from_account.decrease(request_amount, request_currency)
+                try:
+                    transaction_from_account.increase(transaction.amount, transaction.currency.id)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    request_from_account.decrease(request_amount, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
         else:
             if transaction.from_account:
                 transaction_from_account = models.Account.objects.get(pk=transaction.from_account.id)
-                transaction_from_account.increase(transaction.amount, transaction.currency.id)
+                try:
+                    transaction_from_account.increase(transaction.amount, transaction.currency.id)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
             if request.data['from_account']:
                 request_from_account = models.Account.objects.get(pk=request.data['from_account'])
-                request_from_account.decrease(request_amount, request_currency)
+                try:
+                    request_from_account.decrease(request_amount, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
         
         if transaction.on_account and request.data['on_account']:
             transaction_on_account = models.Account.objects.get(pk=transaction.on_account.id)
@@ -105,18 +121,33 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
             if transaction_on_account.id == request_on_account.id:
                 amount_diff = request_amount - transaction.amount
-                request_on_account.increase(amount_diff, request_currency)
+                try:
+                    request_on_account.increase(amount_diff, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
             else:
-                transaction_on_account.decrease(transaction.amount, transaction.currency.id)
-                request_on_account.increase(request_amount, request_currency)
+                try:
+                    transaction_on_account.decrease(transaction.amount, transaction.currency.id)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    request_on_account.increase(request_amount, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
         else:
             if transaction.on_account:
                 transaction_on_account = models.Account.objects.get(pk=transaction.on_account.id)
-                transaction_on_account.decrease(transaction.amount, transaction.currency.id)
+                try:
+                    transaction_on_account.decrease(transaction.amount, transaction.currency.id)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
             if request.data['on_account']:
                 request_on_account = models.Account.objects.get(pk=request.data['on_account'])
-                request_on_account.increase(request_amount, request_currency)
+                try:
+                    request_on_account.increase(request_amount, request_currency)
+                except Exception as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
         if transaction.from_account:
             transaction_from_account.save()
@@ -173,6 +204,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = models.Account.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+    pagination_class = Unpaginated
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.AccountFilterSet
     search_fields = ['title',]
@@ -188,7 +220,7 @@ class AccountViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
     def get_queryset(self):
-        return models.Account.objects.filter(owner=self.request.user)
+        return models.Account.objects.filter(owner=self.request.user).order_by('amount')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -201,11 +233,12 @@ class AccountJournalListView(generics.ListAPIView):
     serializer_class = serializers.AccountJournalSerializer
 
     def get_queryset(self):
-        return models.AccountJournal.objects.filter(owner=self.request.user)
+        return models.AccountJournal.objects.filter(owner=self.request.user).order_by('timestamp')
 
 class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = models.Currency.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+    pagination_class = Unpaginated
     serializer_class = serializers.CurrencySerializer
 
     def get_queryset(self):
@@ -217,13 +250,14 @@ class CurrencyViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Category.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+    pagination_class = Unpaginated
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.CategoryFilterSet
     search_fields = ['name',]
     serializer_class = serializers.CategorySerializer
 
     def get_queryset(self):
-        return models.Category.objects.filter(owner=self.request.user)
+        return models.Category.objects.filter(owner=self.request.user).order_by('name')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -231,6 +265,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class SubcategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Subcategory.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+    pagination_class = Unpaginated
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.SubcategoryFilterSet
     search_fields = ['name',]
@@ -246,7 +281,7 @@ class SubcategoryViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
     def get_queryset(self):
-        return models.Subcategory.objects.filter(owner=self.request.user)
+        return models.Subcategory.objects.filter(owner=self.request.user).order_by('name')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -254,10 +289,11 @@ class SubcategoryViewSet(viewsets.ModelViewSet):
 class PlaceViewSet(viewsets.ModelViewSet):
     queryset = models.Place.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+    pagination_class = Unpaginated
     serializer_class = serializers.PlaceSerializer
 
     def get_queryset(self):
-        return models.Place.objects.filter(owner=self.request.user)
+        return models.Place.objects.filter(owner=self.request.user).order_by('name')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
