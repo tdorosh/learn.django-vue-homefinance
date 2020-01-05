@@ -25,6 +25,30 @@ function getTargets(rawTargets) {
   return targets;
 }
 
+function getDate(date) {
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  }
+  return new Date(date).toLocaleDateString(navigator.language || navigator.userLanguage, options)
+}
+
+function convertDateToISOString(datetimeString) {
+  if (typeof datetimeString === "object") {
+    return datetimeString.toISOString();
+  } else if (typeof datetimeString === "string") {
+    let datetimeArray = datetimeString.split(', ');
+    let date = datetimeArray[0];
+    let time = datetimeArray[1];
+    const newDate = date.split('.').reverse().join('-');
+    return `${newDate}T${time}`;
+  }
+}
+
 export {
-  getTargets,
+  getTargets, getDate, convertDateToISOString,
 };

@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from accounting import models
 
 class AccoutRepresentationField(serializers.RelatedField):
@@ -9,6 +8,7 @@ class AccoutRepresentationField(serializers.RelatedField):
 class ObjectRepresentationField(serializers.RelatedField):
     def to_representation(self, value):
         return {'id': value.id, 'string_repr': '{}'.format(value.name)}
+
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,6 +20,12 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Account
         fields = '__all__'
+
+class AccountJournalSerializer(serializers.ModelSerializer):
+    account = serializers.StringRelatedField()
+    class Meta:
+        model = models.AccountJournal
+        fields = ('id', 'account', 'amount_before', 'amount_after', 'timestamp')
 
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,4 +69,10 @@ class RetrieveAccountSerializer(serializers.ModelSerializer):
         model = models.Account
         fields = ('id', 'title', 'amount', 'currency',
                  'notes', 'create_datetime')
+
+class RetrieveSubcategorySerializer(serializers.ModelSerializer):
+    category = ObjectRepresentationField(read_only='True')
+    class Meta:
+        model = models.Subcategory
+        fields = ('id', 'name', 'category')
 
