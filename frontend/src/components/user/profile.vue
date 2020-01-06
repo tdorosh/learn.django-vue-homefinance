@@ -91,7 +91,7 @@ export default {
 			this.$bvModal.show('deleteUser');
 		},
   },
-  beforeMount(){
+  beforeMount() {
     this.$store.dispatch('getUser');
   },
 }
