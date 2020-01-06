@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 router.register(r'transactions', views.TransactionViewSet, 'Transaction')
 router.register(r'accounts', views.AccountViewSet)
 router.register(r'currencies', views.CurrencyViewSet)

@@ -31,13 +31,17 @@ const ifAuthenticated = (to, form, next) => {
     next();
     return;
   }
-  next('/');
+  next('/user/login');
 };
 
 
 export default new VueRouter({
   mode: 'history',
   routes: [
+    {
+      path: '/',
+      redirect: '/user/login'
+    },
     {
       path: '/home',
       name: 'home',
@@ -46,7 +50,7 @@ export default new VueRouter({
     },
     // User routes
     {
-      path: '/',
+      path: '/user/login',
       name: 'login',
       component: Login,
       beforeEnter: ifNotAuthenticated,
