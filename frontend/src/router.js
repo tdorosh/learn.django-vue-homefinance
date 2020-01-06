@@ -46,7 +46,7 @@ export default new VueRouter({
     },
     // User routes
     {
-      path: '/user/login',
+      path: '/',
       name: 'login',
       component: Login,
       beforeEnter: ifNotAuthenticated,
