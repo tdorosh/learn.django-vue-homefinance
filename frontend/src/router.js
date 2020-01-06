@@ -1,17 +1,20 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import Login from './views/Login.vue'
+import Home from '@/views/Home.vue'
+import profile from '@/components/user/profile.vue'
+import transactionList from '@/components/transaction/transactionList.vue'
+import accountList from '@/components/account/accountList.vue'
+import accountsJournal from '@/components/journal/accountsJournal.vue'
+import currencyList from '@/components/currency/currencyList.vue'
+import categoryList from '@/components/category/categoryList.vue'
+import subcategoryList from '@/components/subcategory/subcategoryList.vue'
+import placeList from '@/components/place/placeList.vue'
+
 import store from './store'
 
-const Home = () => import(/* */ '@/views/Home.vue')
-const profile = () => import(/* */ '@/components/user/profile.vue')
-const transactionList = () => import(/* */ '@/components/transaction/transactionList.vue')
-const accountList = () => import(/* */ '@/components/account/accountList.vue')
-const accountsJournal = () => import(/* */ '@/components/journal/accountsJournal.vue')
-const currencyList = () => import(/*  */ '@/components/currency/currencyList.vue')
-const categoryList = () => import(/* */ '@/components/category/categoryList.vue')
-const subcategoryList = () => import(/* */ '@/components/subcategory/subcategoryList.vue')
-const placeList = () => import(/* */ '@/components/place/placeList.vue')
+
 
 Vue.use(VueRouter)
 
