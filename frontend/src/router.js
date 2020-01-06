@@ -31,7 +31,7 @@ const ifAuthenticated = (to, form, next) => {
     next();
     return;
   }
-  next('/user/login');
+  next('/');
 };
 
 
