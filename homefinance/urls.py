@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 from rest_framework import routers
 from accounting import views
 
@@ -24,3 +24,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
 ]
+
+urlpatterns += [re_path(r'^.*', include('run.urls'))]
