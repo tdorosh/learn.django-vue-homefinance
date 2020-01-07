@@ -9,6 +9,7 @@
           placeholder="Your username"
           required
         ></b-form-input>
+        <b-badge variant="secondary">At least three letters characters at the begining</b-badge>
         <b-list-group v-if="usernameErrors">
           <b-list-group-item 
             v-for="error in usernameErrors"
@@ -45,6 +46,7 @@
           placeholder="Your password"
           required
         ></b-form-input>
+        <b-badge variant="secondary">At least five not only digital characters</b-badge>
         <b-list-group v-if="passwordErrors">
           <b-list-group-item 
             v-for="error in passwordErrors"

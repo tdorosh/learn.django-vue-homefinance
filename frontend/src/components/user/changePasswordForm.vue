@@ -24,6 +24,7 @@
           placeholder="Your new password"
           required
         ></b-form-input>
+        <b-badge variant="secondary">At least five not only digital characters</b-badge>
         <b-list-group v-if="newPasswordErrors">
           <b-list-group-item 
             v-for="error in passwordErrors"

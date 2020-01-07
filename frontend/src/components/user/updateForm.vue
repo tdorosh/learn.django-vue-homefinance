@@ -9,6 +9,7 @@
           type="text"
           required
         ></b-form-input>
+        <b-badge variant="secondary">At least three letters characters at the begining</b-badge>
         <b-list-group v-if="usernameErrors">
           <b-list-group-item 
             v-for="error in usernameErrors"
