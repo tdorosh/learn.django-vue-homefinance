@@ -237,7 +237,7 @@ export default {
             this.form.subcategory = transaction.subcategory;
             this.form.from_account = transaction.from_account;
             this.form.on_account = transaction.on_account;
-            this.form.create_datetime = transaction.create_datetime;
+            this.form.create_datetime = new Date(transaction.create_datetime);
             this.form.place = transaction.place;
             this.form.notes = transaction.notes;
           });

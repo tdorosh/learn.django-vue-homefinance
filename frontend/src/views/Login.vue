@@ -97,6 +97,7 @@ export default {
       this.$store.dispatch('authRequest', { username, password })
       .then(() => {
         this.$router.push('/home');
+        this.$store.dispatch('getUser')
       });
     },
     showRegistrationForm() {
