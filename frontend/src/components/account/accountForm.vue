@@ -135,7 +135,7 @@ export default {
             this.form.amount = account.amount;
             this.form.currency = account.currency;
             this.form.notes = account.notes;
-            this.form.create_datetime = account.create_datetime;
+            this.form.create_datetime = new Date(account.create_datetime);
           })
       } else {
         return null
