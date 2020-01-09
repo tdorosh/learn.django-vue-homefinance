@@ -105,7 +105,8 @@ export default {
           this.usernameErrors = error.response.data.username;
           this.emailErrors = error.response.data.email;
           this.passwordErrors = error.response.data.password;
-      });
+      })
+      
     },
     isPasswordsEqual() {
       return this.confirm_password === this.password;
