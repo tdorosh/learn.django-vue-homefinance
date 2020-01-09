@@ -29,15 +29,14 @@ export default {
             originalRequest.headers['Authorization'] = `Bearer ${store.state.accessToken}`;
             return axiosInstance(originalRequest);
           })
-          .catch((error) => {
+          .catch(() => {
             store.dispatch('authLogout')
             .then(() => {
               router.push('/user/login')
             })
-            return Promise.reject(error);
           })
       }
-      return Promise.reject(error.response)
+      return Promise.reject(error)
     })
   },
 }

@@ -88,7 +88,7 @@ export default {
       return this.$store.getters.userEvent === 'update';
     },
     isPasswordChanged() {
-      return this.$store.getters.userEvent === 'change-pasword';
+      return this.$store.getters.userEvent === 'change-password';
     },
   },
   methods: {

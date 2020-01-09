@@ -38,7 +38,7 @@ const actions = {
       });
     });
   },
-  refreshAuthRequest({ commit}, data) {
+  refreshAuthRequest({ commit }, data) {
     return new Promise((resolve, reject) => {
       commit(AUTH_REQUEST);
       HTTP.post('api/token/refresh/', data)
@@ -73,11 +73,17 @@ const actions = {
       commit(SET_USER, response.data.results)
     }
   },
-  async createUser({ commit }, data) {
-    const response = await HTTP.post('users/create/', data);
-    if (response.status === 201) {
-      commit(CREATE_USER);
-    }
+  createUser({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      HTTP.post('users/create/', data)
+        .then((response) => {
+          commit(CREATE_USER);
+          resolve(response)
+        })
+        .catch((error) => {
+          reject(error);
+        })
+    })
   },
   async updateUser({ commit }, userData) {
     const response = await HTTP.put(`users/profile/${userData.id}/`, userData.data);
@@ -93,7 +99,7 @@ const actions = {
   },
   async changePassword({ commit }, data) {
     const response = await HTTP.put('users/profile/change-password/', data);
-    if (response.status === 200) {
+    if (response.status === 204) {
       commit(CHANGE_USER_PASSWORD)
     }
   },
