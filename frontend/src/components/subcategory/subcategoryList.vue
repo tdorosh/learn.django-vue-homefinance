@@ -72,6 +72,12 @@ export default {
     };
   },
   computed: {
+    subcategoriesFilters() {
+      return this.$store.getters.filter.subcategories;
+    },
+    subcategoriesSearch() {
+      return this.$store.getters.search.subcategories;
+    },
     subcategories() {
       const rawSubcategories = this.$store.getters.subcategories;
       const subcategories = []
@@ -93,6 +99,14 @@ export default {
           this.showWarningAlert=true;
         })
     },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ...this.subcategoriesFilters,
+        search: this.subcategoriesSearch,
+      }};
+      this.$store.dispatch('getSubcategories', params);
+    },
     showCreateModal() {
       this.action = 'create';
       this.modalTitle = 'Create Subcategory'
@@ -107,12 +121,6 @@ export default {
     showDeleteModal(subcategoryId) {
       this.subcategoryId = subcategoryId;
       this.$bvModal.show('deleteSubcategory');
-    },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getSubcategories', params);
     },
   },
 

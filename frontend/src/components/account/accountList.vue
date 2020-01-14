@@ -1,10 +1,30 @@
 <template>
   <div class="container">
-      <h3>Accounts List</h3>
+
+    <b-row>
+      <b-col cols="6">
+        <h3>Accounts List</h3>
       <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      </b-col>
+
+      <b-col cols="3">
+        <b-form-group label="Ordering by" label-for="ordering">
+          <b-form-select id="ordering" v-model="ordering" @change="onOrdering">
+            <option value="amount">Amount-ascending</option>
+            <option value="-amount">Amount-descending</option>
+            <option value="create_datetime">Create date-ascending</option>
+            <option value="-create_datetime">Create date-descending</option>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+    </b-row>
+
+    <b-row>
       <b-alert variant="success" :show="showSuccessAlert" dismissible>Account was created successfully.</b-alert>
       <b-alert variant="info" :show="showInfoAlert" dismissible>Account was updated successfully.</b-alert>
       <b-alert variant="warning" :show="showWarningAlert" dismissible>Account was deleted successfully.</b-alert>
+    </b-row>
+      
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -78,9 +98,16 @@ export default {
           'create_datetime',
           'actions',
         ],
+        ordering: '-create_datetime',
     };
   },
   computed: {
+    accountsFilters() {
+      return this.$store.getters.filter.accounts;
+    },
+    accountsSearch() {
+      return this.$store.getters.search.accounts;
+    },
     ...mapGetters([
         'accounts',
     ]),
@@ -91,6 +118,27 @@ export default {
       .then(() => {
         this.showWarningAlert=true;
       })
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ordering: this.ordering,
+        ...this.accountsFilters,
+        search: this.accountsSearch,
+      }};
+      this.$store.dispatch('getAccounts', params);
+    },
+    onOrdering(ordering) {
+      const params = { params: {
+        ordering: ordering,
+        ...this.accountsFilters,
+        search: this.accountsSearch,
+      }};
+      this.$store.commit('SET_ORDERING', {
+        item: 'accounts',
+        ordering: ordering,
+      })
+      this.$store.dispatch('getAccounts', params);
     },
     showCreateModal() {
       this.action = 'create';
@@ -106,12 +154,6 @@ export default {
     showDeleteModal(accountId) {
       this.accountId = accountId;
       this.$bvModal.show('deleteAccount');
-    },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getAccounts', params);
     },
     getDate: getDate,
   },

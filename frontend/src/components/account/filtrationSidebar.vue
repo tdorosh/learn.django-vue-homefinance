@@ -59,10 +59,10 @@
 
           <b-row>
             <b-col cols=12>
-              <b-form-group label="Date and Time" label-for="create_datetime">
+              <b-form-group label="Date" label-for="create_date">
                 <date-picker 
-                  id="create_datetime" 
-                  v-model="form.create_datetime"
+                  id="create_date" 
+                  v-model="form.create_date"
                   :config="options"
                 ></date-picker>
               </b-form-group>
@@ -85,7 +85,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets, convertDateToISOString } from '@/utils.js';
+import { getTargets } from '@/utils.js';
 
 export default {
   name: 'filtrationSidebar',
@@ -102,11 +102,17 @@ export default {
         search: '',
       },
       options: {
-        format: 'DD.MM.YYYY, HH:mm:ss',
+        format: 'DD.MM.YYYY',
       },
     }
   },
   computed: {
+    accountsOrdering() {
+      return this.$store.getters.ordering.accounts;
+    },
+    accountsFilters() {
+      return this.$store.getters.filter.accounts;
+    },
     ...mapGetters([
         'currencies',
     ]),
@@ -118,8 +124,19 @@ export default {
         from_amount: this.form.from_amount,
         to_amount: this.form.to_amount,
         currency: this.form.currency,
-        create_datetime: convertDateToISOString(this.form.create_datetime),
-      }}
+        create_date: this.form.create_date,
+        ordering: this.accountsOrdering,
+        search: this.form.search,
+      }};
+      this.$store.commit('SET_FILTER', {
+        item: 'accounts',
+        filters: {
+          from_amount: this.form.from_amount,
+          to_amount: this.form.to_amount,
+          currency: this.form.currency,
+          create_date: this.form.create_date,
+        }
+      })
       this.$store.dispatch('getAccounts', params);
     },
     onReset(evt) {
@@ -128,13 +145,23 @@ export default {
       this.form.to_amount = null,
       this.form.currency = null;
       this.form.create_datetime = null;
-      this.$store.dispatch('getAccounts');
+      this.$store.commit('RESET_FILTER', 'accounts');
+      this.$store.dispatch('getAccounts', {params: {
+        ordering: this.accountsOrdering,
+        search: this.form.search,
+      }});
     },
     onSearch(evt) {
       evt.preventDefault();
       const params = {params: {
         search: this.form.search,
-      }}
+        ordering: this.accountsOrdering,
+        ...this.accountsFilters,
+      }};
+      this.$store.commit('SET_SEARCH', {
+        item: 'accounts',
+        search: this.form.search,
+      });
       this.$store.dispatch('getAccounts', params);
     },
     getTargets: getTargets,

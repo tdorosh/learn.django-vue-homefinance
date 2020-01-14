@@ -62,6 +62,9 @@ export default {
     }
   },
   computed: {
+    subcategoriesFilters() {
+      return this.$store.getters.filter.subcategories;
+    },
     ...mapGetters([
         'categories',
     ]),
@@ -71,19 +74,34 @@ export default {
       evt.preventDefault();
       const params = {params: {
         category: this.form.category,
-      }}
+        search: this.form.search,
+      }};
+      this.$store.commit('SET_FILTER', {
+        item: 'subcategories',
+        filters: {
+          category: this.form.category,
+        }
+      })
       this.$store.dispatch('getSubcategories', params);
     },
     onReset(evt) {
       evt.preventDefault();
       this.form.category = null;
-      this.$store.dispatch('getSubcategories');
+      this.$store.commit('RESET_FILTER', 'subcategories');
+      this.$store.dispatch('getSubcategories', {params: {
+        search: this.form.search,
+      }});
     },
     onSearch(evt) {
       evt.preventDefault();
       const params = {params: {
         search: this.form.search,
-      }}
+        category: this.form.category,
+      }};
+      this.$store.commit('SET_SEARCH', {
+        item: 'subcategories',
+        search: this.form.search,
+      });
       this.$store.dispatch('getSubcategories', params);
     },
     getTargets: getTargets,

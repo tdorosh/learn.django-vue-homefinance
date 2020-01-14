@@ -77,6 +77,12 @@ export default {
     };
   },
   computed: {
+    accountsFilters() {
+      return this.$store.getters.filter.categories;
+    },
+    accountsSearch() {
+      return this.$store.getters.search.categories;
+    },
     ...mapGetters([
         'categories',
     ]),
@@ -87,6 +93,14 @@ export default {
         .then(() => {
           this.showWarningAlert=true;
         })
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ...this.categoriesFilters,
+        search: this.categoriesSearch,
+      }};
+      this.$store.dispatch('getCategories', params);
     },
     showCreateModal() {
       this.action = 'create';
@@ -111,12 +125,6 @@ export default {
       } else {
         return 'Technical';
       }
-    },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getCategories', params);
     },
   },
 

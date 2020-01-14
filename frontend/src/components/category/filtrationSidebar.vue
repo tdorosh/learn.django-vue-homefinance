@@ -64,24 +64,44 @@ export default {
       ],
     }
   },
+  computed: {
+    categoriesFilters() {
+      return this.$store.getters.filter.categories;
+    },
+  },
   methods: {
     onSubmit(evt) {
       evt.preventDefault();
       const params = {params: {
         cat_type: this.form.cat_type,
-      }}
+        search: this.form.search,
+      }};
+      this.$store.commit('SET_FILTER', {
+        item: 'categories',
+        filters: {
+          cat_type: this.form.cat_type,
+        }
+      })
       this.$store.dispatch('getCategories', params);
     },
     onReset(evt) {
       evt.preventDefault();
       this.form.cat_type = null;
-      this.$store.dispatch('getCategories');
+      this.$store.commit('RESET_FILTER', 'categories');
+      this.$store.dispatch('getCategories', {params: {
+        search: this.form.search,
+      }});
     },
     onSearch(evt) {
       evt.preventDefault();
       const params = {params: {
         search: this.form.search,
-      }}
+        cat_type: this.form.cat_type,
+      }};
+      this.$store.commit('SET_SEARCH', {
+        item: 'categories',
+        search: this.form.search,
+      });
       this.$store.dispatch('getCategories', params);
     },
   },

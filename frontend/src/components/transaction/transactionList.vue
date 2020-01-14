@@ -1,10 +1,31 @@
 <template>
   <div class="container">
-    <h3>Transactions List</h3>
-    <b-button @click="showCreateModal()" variant="info">Create</b-button>
-    <b-alert variant="success" :show="showSuccessAlert" dismissible>Transaction was created successfully.</b-alert>
-    <b-alert variant="info" :show="showInfoAlert" dismissible>Transaction was updated successfully.</b-alert>
-    <b-alert variant="warning" :show="showWarningAlert" dismissible>Transaction was deleted successfully.</b-alert>
+    <b-row>
+      <b-col cols="6">
+        <h3>Transactions List</h3>
+        <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      </b-col>
+      
+      <b-col cols="3">
+        <b-form-group label="Ordering by" label-for="ordering">
+          <b-form-select id="ordering" v-model="ordering" @change="onOrdering">
+            <option value="amount">Amount-ascending</option>
+            <option value="-amount">Amount-descending</option>
+            <option value="create_datetime">Create date-ascending</option>
+            <option value="-create_datetime">Create date-descending</option>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+    </b-row>
+    
+    <b-row>
+      <b-col cols="9">
+      <b-alert variant="success" :show="showSuccessAlert" dismissible>Transaction was created successfully.</b-alert>
+      <b-alert variant="info" :show="showInfoAlert" dismissible>Transaction was updated successfully.</b-alert>
+      <b-alert variant="warning" :show="showWarningAlert" dismissible>Transaction was deleted successfully.</b-alert>
+      </b-col>
+    </b-row>
+
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -92,6 +113,7 @@ export default {
           'notes',
           'actions',
         ],
+        ordering: '-create_datetime',
         eventError: null,
       };
   },
@@ -132,6 +154,12 @@ export default {
       })
       return transactions;
     },
+    transactionsFilters() {
+      return this.$store.getters.filter.transactions;
+    },
+    transactionsSearch() {
+      return this.$store.getters.search.transactions;
+    },
   },
   methods: {
     onDelete(transactionId) {
@@ -144,6 +172,27 @@ export default {
       }, (error) => {
         this.eventError = error.response.data;
       })
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ordering: this.ordering,
+        ...this.transactionsFilters,
+        search: this.transactionsSearch,
+      }};
+      this.$store.dispatch('getTransactions', params);
+    },
+    onOrdering(ordering) {
+      const params = { params: {
+        ordering: ordering,
+        ...this.transactionsFilters,
+        search: this.transactionsSearch,
+      }};
+      this.$store.commit('SET_ORDERING', {
+        item: 'transactions',
+        ordering: ordering,
+      });
+      this.$store.dispatch('getTransactions', params);
     },
     showCreateModal() {
       this.action = 'create';
@@ -169,12 +218,6 @@ export default {
       } else {
         return 'Technical';
       }
-    },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getTransactions', params);
     },
     getDate: getDate,
   },
