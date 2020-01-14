@@ -38,14 +38,18 @@ function getDate(date) {
 }
 
 function convertDateToISOString(datetimeString) {
-  if (typeof datetimeString === "object") {
-    return datetimeString.toISOString();
-  } else if (typeof datetimeString === "string") {
-    let datetimeArray = datetimeString.split(', ');
-    let date = datetimeArray[0];
-    let time = datetimeArray[1];
-    const newDate = date.split('.').reverse().join('-');
-    return `${newDate}T${time}`;
+  if (datetimeString) {
+    if (typeof datetimeString === "object") {
+      return datetimeString.toISOString();
+    } else if (typeof datetimeString === "string") {
+      let datetimeArray = datetimeString.split(', ');
+      let date = datetimeArray[0];
+      let time = datetimeArray[1];
+      const newDate = date.split('.').reverse().join('-');
+      return `${newDate}T${time}`;
+    }
+  } else {
+      return null
   }
 }
 
