@@ -3,16 +3,19 @@
     <b-row><b-col cols=12><h3>Filtration Sidebar</h3></b-col></b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSearch">
+        <b-form @submit="onSearch" @reset="onSearchReset">
           <b-row>
             <b-col cols=12>
               <b-form-group label="Search in notes" label-for="search">
                 <b-row>
-                  <b-col cols=8>
+                  <b-col cols=6>
                     <b-form-input id="search" type="search" v-model="form.search"></b-form-input>
                   </b-col>
                   <b-col cols=4>
                     <b-button type="submit" variant="primary">Search</b-button>
+                  </b-col>
+                  <b-col cols=2>
+                    <b-button type="reset" variant="danger">&times;</b-button>
                   </b-col>
                 </b-row>
               </b-form-group>
@@ -23,7 +26,7 @@
     </b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSubmit" @reset="onReset">
+        <b-form @submit="onFilter" @reset="onFilterReset">
           <b-row>
             <b-col cols=6>
               <b-form-group label="From Amount" label-for="fromAmount">
@@ -112,11 +115,21 @@
           </b-row>
 
           <b-row>
-            <b-col cols=12>
-              <b-form-group label="Date" label-for="create_date">
+            <b-col cols=6>
+              <b-form-group label="From date" label-for="from_create_date">
                 <date-picker 
-                  id="create_date" 
-                  v-model="form.create_date"
+                  id="from_create_date" 
+                  v-model="form.from_create_date"
+                  :config="options"
+                ></date-picker>
+              </b-form-group>
+            </b-col>
+
+            <b-col cols=6>
+              <b-form-group label="To date" label-for="to_create_date">
+                <date-picker 
+                  id="to_create_date" 
+                  v-model="form.to_create_date"
                   :config="options"
                 ></date-picker>
               </b-form-group>
@@ -135,7 +148,7 @@
             </b-col>
           </b-row>
 
-          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="submit" variant="primary">Filter</b-button>&nbsp;
           <b-button type="reset" variant="danger">Reset</b-button>
 
         </b-form>
@@ -169,9 +182,10 @@ export default {
         subcategory: null,
         from_account: null,
         on_account: null,
-        create_date: null,
+        from_create_date: null,
+        to_create_date: null,
         place: null,
-        search: '',
+        search: null,
       },
       transactionTypes: [
         {value: null, text: '--Select item--'},
@@ -191,13 +205,16 @@ export default {
     transactionsFilters() {
       return this.$store.getters.filter.transactions;
     },
+    transactionsSearch() {
+      return this.$store.getters.search.transactions;
+    },
     ...mapGetters([
         'accounts', 'currencies', 'categories',
         'subcategories', 'places',
     ]),
   },
   methods: {
-    onSubmit(evt) {
+    onFilter(evt) {
       evt.preventDefault();
       const params = {params: {
         from_amount: this.form.from_amount,
@@ -208,7 +225,8 @@ export default {
         subcategory: this.form.subcategory,
         from_account: this.form.from_account,
         on_account: this.form.on_account,
-        create_date: this.form.create_date,
+        from_create_date: this.form.from_create_date,
+        to_create_date: this.form.to_create_date,
         place: this.form.place,
         ordering: this.transactionsOrdering,
         search: this.form.search,
@@ -224,13 +242,14 @@ export default {
           subcategory: this.form.subcategory,
           from_account: this.form.from_account,
           on_account: this.form.on_account,
-          create_date: this.form.create_date,
+          from_create_date: this.form.from_create_date,
+          to_create_date: this.form.to_create_date,
           place: this.form.place,
         },
       });
       this.$store.dispatch('getTransactions', params);
     },
-    onReset(evt) {
+    onFilterReset(evt) {
       evt.preventDefault();
       this.form.from_amount = null;
       this.form.to_amount = null;
@@ -240,7 +259,8 @@ export default {
       this.form.subcategory = null;
       this.form.from_account = null;
       this.form.on_account = null;
-      this.form.create_date = null;
+      this.form.from_create_date = null;
+      this.form.to_create_date = null;
       this.form.place = null;
       this.$store.commit('RESET_FILTER', 'transactions')
       this.$store.dispatch('getTransactions', {params: {
@@ -260,6 +280,29 @@ export default {
         search: this.form.search,
       });
       this.$store.dispatch('getTransactions', params);
+    },
+    onSearchReset(evt) {
+      evt.preventDefault();
+      this.form.search = null;
+      this.$store.commit('RESET_SEARCH', 'transactions')
+      this.$store.dispatch('getTransactions', {params: {
+        ordering: this.transactionsOrdering,
+        ...this.transactionsFilters,
+      }});
+    },
+    updateFilterSearchData() {
+      this.form.from_amount = this.transactionsFilters.from_amount;
+      this.form.to_amount = this.transactionsFilters.to_amount;
+      this.form.currency = this.transactionsFilters.currency;
+      this.form.trans_type = this.transactionsFilters.trans_type;
+      this.form.category = this.transactionsFilters.category;
+      this.form.subcategory = this.transactionsFilters.subcategory;
+      this.form.from_account = this.transactionsFilters.from_account;
+      this.form.on_account = this.transactionsFilters.on_account;
+      this.form.from_create_date = this.transactionsFilters.from_create_date;
+      this.form.to_create_date = this.transactionsFilters.to_create_date;
+      this.form.place = this.transactionsFilters.place;
+      this.form.search = this.transactionsSearch;
     },
     getTargets: getTargets,
     getFilterAccounts(currencyId) {
@@ -308,6 +351,7 @@ export default {
     this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
     this.$store.dispatch('getSubcategories', { params: {'get_all': 'true'}});
     this.$store.dispatch('getPlaces', { params: {'get_all': 'true'}});
+    this.updateFilterSearchData()
   },
 }
 </script>

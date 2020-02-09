@@ -3,16 +3,19 @@
     <b-row><b-col cols=12><h3>Filtration Sidebar</h3></b-col></b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSearch">
+        <b-form @submit="onSearch" @reset="onSearchReset">
           <b-row>
             <b-col cols=12>
               <b-form-group label="Search in subcategories" label-for="search">
                 <b-row>
-                  <b-col cols=8>
+                  <b-col cols=6>
                     <b-form-input id="search" type="search" v-model="form.search"></b-form-input>
                   </b-col>
                   <b-col cols=4>
                     <b-button type="submit" variant="primary">Search</b-button>
+                  </b-col>
+                  <b-col cols=2>
+                    <b-button type="reset" variant="danger">&times;</b-button>
                   </b-col>
                 </b-row>
               </b-form-group>
@@ -23,7 +26,7 @@
     </b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSubmit" @reset="onReset">
+        <b-form @submit="onFilter" @reset="onFilterReset">
 
           <b-row>
             <b-col cols=12>
@@ -37,7 +40,7 @@
             </b-col>
           </b-row>
 
-          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="submit" variant="primary">Filter</b-button>&nbsp;
           <b-button type="reset" variant="danger">Reset</b-button>
 
         </b-form>
@@ -65,12 +68,15 @@ export default {
     subcategoriesFilters() {
       return this.$store.getters.filter.subcategories;
     },
+    subcategoriesSearch() {
+      return this.$store.getters.search.subcategories;
+    },
     ...mapGetters([
         'categories',
     ]),
   },
   methods: {
-    onSubmit(evt) {
+    onFilter(evt) {
       evt.preventDefault();
       const params = {params: {
         category: this.form.category,
@@ -84,7 +90,7 @@ export default {
       })
       this.$store.dispatch('getSubcategories', params);
     },
-    onReset(evt) {
+    onFilterReset(evt) {
       evt.preventDefault();
       this.form.category = null;
       this.$store.commit('RESET_FILTER', 'subcategories');
@@ -104,10 +110,23 @@ export default {
       });
       this.$store.dispatch('getSubcategories', params);
     },
+    onSearchReset(evt) {
+      evt.preventDefault();
+      this.form.search = null;
+      this.$store.commit('RESET_SEARCH', 'subcategories')
+      this.$store.dispatch('getSubcategories', {params: {
+        ...this.subcategoriesFilters,
+      }});
+    },
+    updateFilterSearchData() {
+      this.form.category = this.subcategoriesFilters.category;
+      this.form.search = this.subcategoriesSearch;
+    },
     getTargets: getTargets,
   },
   beforeMount() {
     this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
+    this.updateFilterSearchData()
   },
 }
 </script>

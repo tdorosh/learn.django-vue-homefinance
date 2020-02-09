@@ -2,6 +2,7 @@ import {
   AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
   SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER, CHANGE_USER_PASSWORD,
   SET_OBJECTS_COUNT,
+  RESET_FILTER, RESET_ORDERING, RESET_SEARCH,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
   SET_JOURNAL,
@@ -60,6 +61,18 @@ const actions = {
   authLogout ({ commit }) {
     return new Promise((resolve) => {
       commit(AUTH_LOGOUT);
+      commit(RESET_FILTER, 'transactions');
+      commit(RESET_FILTER, 'accounts');
+      commit(RESET_FILTER, 'journal');
+      commit(RESET_FILTER, 'categories');
+      commit(RESET_FILTER, 'subcategories');
+      commit(RESET_ORDERING, 'transactions');
+      commit(RESET_ORDERING, 'accounts');
+      commit(RESET_ORDERING, 'journal');
+      commit(RESET_SEARCH, 'transactions');
+      commit(RESET_SEARCH, 'accounts');
+      commit(RESET_SEARCH, 'categories');
+      commit(RESET_SEARCH, 'subcategories');
       localStorage.removeItem('user-token');
       localStorage.removeItem('user-refresh-token');
       delete axiosInstance.defaults.headers.common.Authorization;

@@ -1,10 +1,9 @@
 <template>
   <div class="container">
-
     <b-row>
       <b-col cols="6">
         <h3>Accounts List</h3>
-      <b-button @click="showCreateModal()" variant="info">Create</b-button>
+        <b-button @click="showCreateModal()" variant="info">Create</b-button>
       </b-col>
 
       <b-col cols="3">
@@ -102,6 +101,9 @@ export default {
     };
   },
   computed: {
+    accountsOrdering() {
+      return this.$store.getters.ordering.accounts;
+    },
     accountsFilters() {
       return this.$store.getters.filter.accounts;
     },
@@ -140,6 +142,9 @@ export default {
       })
       this.$store.dispatch('getAccounts', params);
     },
+    updateOrderingData() {
+      this.ordering = this.accountsOrdering;
+    },
     showCreateModal() {
       this.action = 'create';
       this.modalTitle = 'Create Account'
@@ -159,7 +164,12 @@ export default {
   },
 
   beforeMount() {
-    this.$store.dispatch('getAccounts');
+    this.updateOrderingData(),
+    this.$store.dispatch('getAccounts', {params: {
+      ordering: this.accountsOrdering,
+      ...this.accountsFilters,
+      search: this.accountsSearch,
+    }});
   },  
 }
 </script>

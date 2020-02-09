@@ -3,7 +3,7 @@ import {
   SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER, CHANGE_USER_PASSWORD,
   SET_OBJECTS_COUNT,
   SET_FILTER, RESET_FILTER,
-  SET_ORDERING, SET_SEARCH,
+  SET_ORDERING, RESET_ORDERING, SET_SEARCH, RESET_SEARCH,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
   SET_JOURNAL,
@@ -68,17 +68,27 @@ export default {
     state.filter[payload.item] = payload.filters;
   },
   [RESET_FILTER] (state, item) {
-    state.filter[item] = {};
+    state.filter[item] = null;
   },
 
   //Ordering mutations
   [SET_ORDERING] (state, payload) {
     state.ordering[payload.item] = payload.ordering;
   },
+  [RESET_ORDERING] (state, item) {
+    if (item === 'journal') {
+      state.ordering[item] = '-timestamp';
+    } else {
+        state.ordering[item] = '-create_datetime';
+    }
+  },
 
   //Search mutations
   [SET_SEARCH] (state, payload) {
     state.search[payload.item] = payload.search;
+  },
+  [RESET_SEARCH] (state, item) {
+    state.search[item] = null;
   },
 
   //Transactions mutations

@@ -43,7 +43,7 @@
           </b-table>
         </b-row>
         <b-row>
-          <paginateNav :property="'transactions'" @set-page-request="setPaginationRequest" />
+          <paginateNav class="paginate" :property="'transactions'" @set-page-request="setPaginationRequest" />
         </b-row>
       </b-col>
       <b-col cols="3">
@@ -113,7 +113,7 @@ export default {
           'notes',
           'actions',
         ],
-        ordering: '-create_datetime',
+        ordering: '',
         eventError: null,
       };
   },
@@ -154,6 +154,9 @@ export default {
       })
       return transactions;
     },
+    transactionsOrdering() {
+      return this.$store.getters.ordering.transactions;
+    },
     transactionsFilters() {
       return this.$store.getters.filter.transactions;
     },
@@ -180,7 +183,7 @@ export default {
         ...this.transactionsFilters,
         search: this.transactionsSearch,
       }};
-      this.$store.dispatch('getTransactions', params);
+      this.$store.dispatch('getTransactions', params)
     },
     onOrdering(ordering) {
       const params = { params: {
@@ -192,7 +195,10 @@ export default {
         item: 'transactions',
         ordering: ordering,
       });
-      this.$store.dispatch('getTransactions', params);
+      this.$store.dispatch('getTransactions', params)
+    },
+    updateOrderingData() {
+      this.ordering = this.transactionsOrdering;
     },
     showCreateModal() {
       this.action = 'create';
@@ -222,7 +228,12 @@ export default {
     getDate: getDate,
   },
   beforeMount() {
-    this.$store.dispatch('getTransactions');
+    this.updateOrderingData(),
+    this.$store.dispatch('getTransactions', {params: {
+      ordering: this.transactionsOrdering,
+      ...this.transactionsFilters,
+      search: this.transactionsSearch,
+    }});
   },  
 }
 </script>

@@ -20,9 +20,11 @@ export const RESET_FILTER = 'RESET_FILTER'
 
 //Ordering mutations types
 export const SET_ORDERING = 'SET_ORDERING'
+export const RESET_ORDERING = 'RESET_ORDERING'
 
 //Search mutations types
 export const SET_SEARCH = 'SET_SEARCH'
+export const RESET_SEARCH = 'RESET_SEARCH'
 
 //Transactions mutations types
 export const SET_TRANSACTIONS = 'SET_TRANSACTIONS'

@@ -1,10 +1,18 @@
 <template>
   <div class="container">
-      <h3>Subcategories List</h3>
-      <b-button @click="showCreateModal()" variant="info">Create</b-button>
+    <b-row>
+      <b-col cols="6">
+        <h3>Subcategories List</h3>
+        <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      </b-col>
+    </b-row>
+
+    <b-row>
       <b-alert variant="success" :show="showSuccessAlert" dismissible>Subcategory was created successfully.</b-alert>
       <b-alert variant="info" :show="showInfoAlert" dismissible>Subcategory was updated successfully.</b-alert>
       <b-alert variant="warning" :show="showWarningAlert" dismissible>Subcategory was deleted successfully.</b-alert>
+    </b-row>
+
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -125,7 +133,10 @@ export default {
   },
 
   beforeMount() {
-    this.$store.dispatch('getSubcategories');
+    this.$store.dispatch('getSubcategories', {params: {
+      ...this.subcategoriesFilters,
+      search: this.subcategoriesSearch,
+    }});
   },  
 }
 </script>

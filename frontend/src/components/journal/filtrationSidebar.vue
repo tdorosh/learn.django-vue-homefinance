@@ -59,18 +59,28 @@
           </b-row>
 
           <b-row>
-            <b-col cols=12>
-              <b-form-group label="Date" label-for="create_date">
+            <b-col cols=6>
+              <b-form-group label="From date" label-for="from_timestamp">
                 <date-picker 
-                  id="create_date" 
-                  v-model="form.create_date"
+                  id="from_timestamp" 
+                  v-model="form.from_timestamp"
+                  :config="options"
+                ></date-picker>
+              </b-form-group>
+            </b-col>
+
+            <b-col cols=6>
+              <b-form-group label="To date" label-for="to_timestamp">
+                <date-picker 
+                  id="to_timestamp" 
+                  v-model="form.to_timestamp"
                   :config="options"
                 ></date-picker>
               </b-form-group>
             </b-col>
           </b-row>
 
-          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="submit" variant="primary">Filter</b-button>&nbsp;
           <b-button type="reset" variant="danger">Reset</b-button>
 
         </b-form>
@@ -101,7 +111,8 @@ export default {
         from_amount_after: null,
         to_amount_after: null,
         account: null,
-        create_date: null,
+        from_timestamp: null,
+        to_timestamp: null,
       },
       options: {
         format: 'DD.MM.YYYY',
@@ -111,6 +122,9 @@ export default {
   computed: {
     journalOrdering() {
       return this.$store.getters.ordering.journal;
+    },
+    journalFilters() {
+      return this.$store.getters.filter.journal;
     },
     ...mapGetters([
         'accounts',
@@ -125,7 +139,8 @@ export default {
         from_amount_after: this.form.from_amount_after,
         to_amount_after: this.form.to_amount_after,
         account: this.form.account,
-        create_date: this.form.create_date,
+        from_timestamp: this.form.from_timestamp,
+        to_timestamp: this.form.to_timestamp,
         ordering: this.journalOrdering,
       }};
       this.$store.commit('SET_FILTER', {
@@ -136,7 +151,8 @@ export default {
           from_amount_after: this.form.from_amount_after,
           to_amount_after: this.form.to_amount_after,
           account: this.form.account,
-          create_date: this.form.create_date,
+          from_timestamp: this.form.from_timestamp,
+          to_timestamp: this.form.to_timestamp,
         },
       });
       this.$store.dispatch('getJournal', params);
@@ -148,14 +164,25 @@ export default {
       this.form.from_amount_after = null;
       this.form.to_amount_after = null;
       this.form.account = null;
-      this.form.create_date = null;
+      this.form.from_timestamp = null;
+      this.form.to_timestamp = null;
       this.$store.commit('RESET_FILTER', 'journal')
       this.$store.dispatch('getJournal', {params: { ordering: this.journalOrdering }});
+    },
+    updateFilterData() {
+      this.form.from_amount_before = this.journalFilters.from_amount_before;
+      this.form.to_amount_before = this.journalFilters.to_amount_before;
+      this.form.from_amount_after = this.journalFilters.from_amount_after;
+      this.form.to_amount_after = this.journalFilters.to_amount_after;
+      this.form.account = this.journalFilters.account;
+      this.form.from_timestamp = this.journalFilters.from_timestamp;
+      this.form.to_timestamp = this.journalFilters.to_timestamp;
     },
     getTargets: getTargets,
   },
   beforeMount() {
     this.$store.dispatch('getAccounts', { params: {'get_all': 'true'}});
+    this.updateFilterData();
   }
 }
 </script>

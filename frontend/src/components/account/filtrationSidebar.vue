@@ -3,16 +3,19 @@
     <b-row><b-col cols=12><h3>Filtration Sidebar</h3></b-col></b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSearch">
+        <b-form @submit="onSearch" @reset="onSearchReset">
           <b-row>
             <b-col cols=12>
               <b-form-group label="Search in accounts" label-for="search">
                 <b-row>
-                  <b-col cols=8>
+                  <b-col cols=6>
                     <b-form-input id="search" type="search" v-model="form.search"></b-form-input>
                   </b-col>
                   <b-col cols=4>
                     <b-button type="submit" variant="primary">Search</b-button>
+                  </b-col>
+                  <b-col cols=2>
+                    <b-button type="reset" variant="danger">&times;</b-button>
                   </b-col>
                 </b-row>
               </b-form-group>
@@ -23,7 +26,7 @@
     </b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSubmit" @reset="onReset">
+        <b-form @submit="onFilter" @reset="onFilterReset">
           <b-row>
             <b-col cols=6>
               <b-form-group label="From Amount" label-for="fromAmount">
@@ -58,18 +61,28 @@
           </b-row>
 
           <b-row>
-            <b-col cols=12>
-              <b-form-group label="Date" label-for="create_date">
+            <b-col cols=6>
+              <b-form-group label="From date" label-for="from_create_date">
                 <date-picker 
-                  id="create_date" 
-                  v-model="form.create_date"
+                  id="from_create_date" 
+                  v-model="form.from_create_date"
+                  :config="options"
+                ></date-picker>
+              </b-form-group>
+            </b-col>
+
+            <b-col cols=6>
+              <b-form-group label="To date" label-for="to_create_date">
+                <date-picker 
+                  id="to_create_date" 
+                  v-model="form.to_create_date"
                   :config="options"
                 ></date-picker>
               </b-form-group>
             </b-col>
           </b-row>
 
-          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="submit" variant="primary">Filter</b-button>&nbsp;
           <b-button type="reset" variant="danger">Reset</b-button>
 
         </b-form>
@@ -98,8 +111,9 @@ export default {
         from_amount: null,
         to_amount: null,
         currency: null,
-        create_datetime: null,
-        search: '',
+        from_create_date: null,
+        to_create_date: null,
+        search: null,
       },
       options: {
         format: 'DD.MM.YYYY',
@@ -113,18 +127,22 @@ export default {
     accountsFilters() {
       return this.$store.getters.filter.accounts;
     },
+    accountsSearch() {
+      return this.$store.getters.search.accounts;
+    },
     ...mapGetters([
         'currencies',
     ]),
   },
   methods: {
-    onSubmit(evt) {
+    onFilter(evt) {
       evt.preventDefault();
       const params = {params: {
         from_amount: this.form.from_amount,
         to_amount: this.form.to_amount,
         currency: this.form.currency,
-        create_date: this.form.create_date,
+        from_create_date: this.form.from_create_date,
+        to_create_date: this.form.to_create_date,
         ordering: this.accountsOrdering,
         search: this.form.search,
       }};
@@ -134,17 +152,19 @@ export default {
           from_amount: this.form.from_amount,
           to_amount: this.form.to_amount,
           currency: this.form.currency,
-          create_date: this.form.create_date,
+          from_create_date: this.form.from_create_date,
+          to_create_date: this.form.to_create_date,
         }
       })
       this.$store.dispatch('getAccounts', params);
     },
-    onReset(evt) {
+    onFilterReset(evt) {
       evt.preventDefault();
       this.form.from_amount = null,
       this.form.to_amount = null,
       this.form.currency = null;
-      this.form.create_datetime = null;
+      this.form.from_create_date = null;
+      this.form.to_create_date = null;
       this.$store.commit('RESET_FILTER', 'accounts');
       this.$store.dispatch('getAccounts', {params: {
         ordering: this.accountsOrdering,
@@ -164,10 +184,28 @@ export default {
       });
       this.$store.dispatch('getAccounts', params);
     },
+    onSearchReset(evt) {
+      evt.preventDefault();
+      this.form.search = null;
+      this.$store.commit('RESET_SEARCH', 'accounts')
+      this.$store.dispatch('getAccounts', {params: {
+        ordering: this.accountsOrdering,
+        ...this.accountsFilters,
+      }});
+    },
+    updateFilterSearchData() {
+      this.form.from_amount = this.accountsFilters.from_amount;
+      this.form.to_amount = this.accountsFilters.to_amount;
+      this.form.currency = this.accountsFilters.currency;
+      this.form.from_create_date = this.accountsFilters.from_create_date;
+      this.form.to_create_date = this.accountsFilters.to_create_date;
+      this.form.search = this.accountsSearch;
+    },
     getTargets: getTargets,
   },
   beforeMount() {
     this.$store.dispatch('getCurrencies', { params: {'get_all': 'true'}});
+    this.updateFilterSearchData()
   }
 }
 </script>

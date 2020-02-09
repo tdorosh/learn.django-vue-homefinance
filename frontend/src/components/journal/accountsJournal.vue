@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <b-row>
-      <b-col cols="4">
+      <b-col cols="6">
         <h3>Accounts Journal</h3>
       </b-col>
       <b-col cols="3">
@@ -19,7 +19,7 @@
     </b-row>
       
     <b-row>
-      <b-col cols="7">
+      <b-col cols="9">
         <b-row>
           <b-table :items="journal" :fields="fields" responsive primary-key="id">
             <template v-slot:cell(timestamp)="data">
@@ -28,7 +28,7 @@
           </b-table>
         </b-row>
         <b-row>
-          <paginateNav :property="'journal'" @set-page-request="setPaginationRequest" />
+          <paginateNav class="paginate" :property="'journal'" @set-page-request="setPaginationRequest" />
         </b-row>
       </b-col>
       <b-col cols="3">
@@ -64,6 +64,9 @@ export default {
     };
   },
   computed: {
+    journalOrdering() {
+      return this.$store.getters.ordering.journal;
+    },
     journalFilters() {
       return this.$store.getters.filter.journal;
     },
@@ -84,7 +87,18 @@ export default {
         item: 'journal',
         ordering: ordering,
       })
+      this.$store.dispatch('getJournal', params)
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ...this.journalFilters,
+        ordering: this.ordering,
+      }};
       this.$store.dispatch('getJournal', params);
+    },
+    updateOrderingData() {
+      this.ordering = this.journalOrdering;
     },
     showCreateModal() {
       this.action = 'create';
@@ -101,21 +115,15 @@ export default {
       this.categoryId = categoryId;
       this.$bvModal.show('deleteCategory');
     },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-        ...this.journalFilters,
-        ordering: this.ordering,
-      }};
-      this.$store.dispatch('getJournal', params);
-    },
     getDate: getDate,
   },
 
   beforeMount() {
-    this.$store.dispatch('getTransactions');
-    this.$store.dispatch('getAccounts');
-    this.$store.dispatch('getJournal');
+    this.updateOrderingData(),
+    this.$store.dispatch('getJournal', {params: {
+      ordering: this.journalOrdering,
+      ...this.journalFilters,
+    }});
   },  
 }
 </script>

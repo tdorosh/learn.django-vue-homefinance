@@ -24,16 +24,16 @@ export default new Vuex.Store({
       { places: null },
     ],
     filter: {
-      transactions: {},
-      accounts: {},
-      journal: {},
-      categories: {},
-      subcategories: {},
-    },
-    ordering: {
       transactions: null,
       accounts: null,
       journal: null,
+      categories: null,
+      subcategories: null,
+    },
+    ordering: {
+      transactions: '-create_datetime',
+      accounts: '-create_datetime',
+      journal: '-timestamp',
     },
     search: {
       transactions: null,

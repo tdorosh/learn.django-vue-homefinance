@@ -1,10 +1,18 @@
 <template>
   <div class="container">
-      <h3>Categories List</h3>
-      <b-button @click="showCreateModal()" variant="info">Create</b-button>
+    <b-row>
+      <b-col cols="6">
+        <h3>Categories List</h3>
+        <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      </b-col>
+    </b-row>
+
+    <b-row>
       <b-alert variant="success" :show="showSuccessAlert" dismissible>Category was created successfully.</b-alert>
       <b-alert variant="info" :show="showInfoAlert" dismissible>Category was updated successfully.</b-alert>
       <b-alert variant="warning" :show="showWarningAlert" dismissible>Category was deleted successfully.</b-alert>
+    </b-row>
+
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -77,10 +85,10 @@ export default {
     };
   },
   computed: {
-    accountsFilters() {
+    categoriesFilters() {
       return this.$store.getters.filter.categories;
     },
-    accountsSearch() {
+    categoriesSearch() {
       return this.$store.getters.search.categories;
     },
     ...mapGetters([
@@ -129,7 +137,10 @@ export default {
   },
 
   beforeMount() {
-    this.$store.dispatch('getCategories');
+    this.$store.dispatch('getCategories', {params: {
+      ...this.categoriesFilters,
+      search: this.categoriesSearch,
+    }});
   },  
 }
 </script>
