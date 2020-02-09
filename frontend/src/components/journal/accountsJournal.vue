@@ -1,8 +1,25 @@
 <template>
   <div class="container">
-      <h3>Accounts Journal</h3>
     <b-row>
-      <b-col cols="7">
+      <b-col cols="6">
+        <h3>Accounts Journal</h3>
+      </b-col>
+      <b-col cols="3">
+        <b-form-group label="Ordering by" label-for="ordering">
+          <b-form-select id="ordering" v-model="ordering" @change="onOrdering">
+            <option value="amount_before">Amount before-ascending</option>
+            <option value="-amount_before">Amount before-descending</option>
+            <option value="amount_after">Amount after-ascending</option>
+            <option value="-amount_after">Amount after-descending</option>
+            <option value="timestamp">Timestamp-ascending</option>
+            <option value="-timestamp">Timestamp-descending</option>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+    </b-row>
+      
+    <b-row>
+      <b-col cols="9">
         <b-row>
           <b-table :items="journal" :fields="fields" responsive primary-key="id">
             <template v-slot:cell(timestamp)="data">
@@ -11,7 +28,7 @@
           </b-table>
         </b-row>
         <b-row>
-          <paginateNav :property="'journal'" @set-page-request="setPaginationRequest" />
+          <paginateNav class="paginate" :property="'journal'" @set-page-request="setPaginationRequest" />
         </b-row>
       </b-col>
       <b-col cols="3">
@@ -43,9 +60,16 @@ export default {
         'amount_after',
         'timestamp',
       ],
+      ordering: '-timestamp',
     };
   },
   computed: {
+    journalOrdering() {
+      return this.$store.getters.ordering.journal;
+    },
+    journalFilters() {
+      return this.$store.getters.filter.journal;
+    },
     ...mapGetters([
         'journal' ,'transactions', 'accounts',
     ]),
@@ -53,6 +77,28 @@ export default {
   methods: {
     onDelete(categoryId) {
       this.$store.dispatch('deleteCategory', categoryId)
+    },
+    onOrdering(ordering) {
+      const params = { params: {
+        ordering: ordering,
+        ...this.journalFilters,
+      }};
+      this.$store.commit('SET_ORDERING', {
+        item: 'journal',
+        ordering: ordering,
+      })
+      this.$store.dispatch('getJournal', params)
+    },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ...this.journalFilters,
+        ordering: this.ordering,
+      }};
+      this.$store.dispatch('getJournal', params);
+    },
+    updateOrderingData() {
+      this.ordering = this.journalOrdering;
     },
     showCreateModal() {
       this.action = 'create';
@@ -69,19 +115,15 @@ export default {
       this.categoryId = categoryId;
       this.$bvModal.show('deleteCategory');
     },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getJournal', params);
-    },
     getDate: getDate,
   },
 
   beforeMount() {
-    this.$store.dispatch('getTransactions');
-    this.$store.dispatch('getAccounts');
-    this.$store.dispatch('getJournal');
+    this.updateOrderingData(),
+    this.$store.dispatch('getJournal', {params: {
+      ordering: this.journalOrdering,
+      ...this.journalFilters,
+    }});
   },  
 }
 </script>

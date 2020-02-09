@@ -2,6 +2,8 @@ import {
   AUTH_REQUEST, AUTH_SUCCESS, AUTH_ERROR, AUTH_LOGOUT,
   SET_USER, CREATE_USER, UPDATE_USER, DELETE_USER, CHANGE_USER_PASSWORD,
   SET_OBJECTS_COUNT,
+  SET_FILTER, RESET_FILTER,
+  SET_ORDERING, RESET_ORDERING, SET_SEARCH, RESET_SEARCH,
   SET_TRANSACTIONS, SET_TRANSACTION, CREATE_TRANSACTION, UPDATE_TRANSACTION, REMOVE_TRANSACTION,
   SET_ACCOUNTS, SET_ACCOUNT, CREATE_ACCOUNT, REMOVE_ACCOUNT,
   SET_JOURNAL,
@@ -12,6 +14,7 @@ import {
 } from './mutation-types.js'
 
 export default {
+
   // Auth mutations 
   [AUTH_REQUEST] (state){
     state.authStatus = 'loading';
@@ -32,6 +35,7 @@ export default {
     state.accessToken = null;
     state.refreshToken = null;
   },
+
   // User mutations
   [SET_USER] (state, user) {
     state.authUser = user;
@@ -48,6 +52,7 @@ export default {
   [CHANGE_USER_PASSWORD] (state) {
     state.userEvent = 'change-password';
   },
+
   //Mutation for save objects count
   [SET_OBJECTS_COUNT] (state, payload) {
     const object = state.objectsCount.filter(objectCount => {
@@ -57,6 +62,35 @@ export default {
       object[payload.propertyName] = payload.countNumber;
     }
   },
+
+  //Filter mutations
+  [SET_FILTER] (state, payload) {
+    state.filter[payload.item] = payload.filters;
+  },
+  [RESET_FILTER] (state, item) {
+    state.filter[item] = null;
+  },
+
+  //Ordering mutations
+  [SET_ORDERING] (state, payload) {
+    state.ordering[payload.item] = payload.ordering;
+  },
+  [RESET_ORDERING] (state, item) {
+    if (item === 'journal') {
+      state.ordering[item] = '-timestamp';
+    } else {
+        state.ordering[item] = '-create_datetime';
+    }
+  },
+
+  //Search mutations
+  [SET_SEARCH] (state, payload) {
+    state.search[payload.item] = payload.search;
+  },
+  [RESET_SEARCH] (state, item) {
+    state.search[item] = null;
+  },
+
   //Transactions mutations
   [SET_TRANSACTIONS] (state, transactions) {
     state.transactions = transactions;
@@ -65,7 +99,6 @@ export default {
     state.transaction = transaction;
   },
   [UPDATE_TRANSACTION] (state) {// eslint-disable-line no-unused-vars
-        
   },
   [CREATE_TRANSACTION] (state, transaction) {
     state.transactions = [transaction, ...state.transactions];

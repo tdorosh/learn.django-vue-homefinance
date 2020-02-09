@@ -3,16 +3,19 @@
     <b-row><b-col cols=12><h3>Filtration Sidebar</h3></b-col></b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSearch">
+        <b-form @submit="onSearch" @reset="onSearchReset">
           <b-row>
             <b-col cols=12>
               <b-form-group label="Search in notes" label-for="search">
                 <b-row>
-                  <b-col cols=8>
+                  <b-col cols=6>
                     <b-form-input id="search" type="search" v-model="form.search"></b-form-input>
                   </b-col>
                   <b-col cols=4>
                     <b-button type="submit" variant="primary">Search</b-button>
+                  </b-col>
+                  <b-col cols=2>
+                    <b-button type="reset" variant="danger">&times;</b-button>
                   </b-col>
                 </b-row>
               </b-form-group>
@@ -23,7 +26,7 @@
     </b-row>
     <b-row>
       <b-col cols=12>
-        <b-form @submit="onSubmit" @reset="onReset">
+        <b-form @submit="onFilter" @reset="onFilterReset">
           <b-row>
             <b-col cols=6>
               <b-form-group label="From Amount" label-for="fromAmount">
@@ -112,11 +115,21 @@
           </b-row>
 
           <b-row>
-            <b-col cols=12>
-              <b-form-group label="Date and Time" label-for="create_datetime">
+            <b-col cols=6>
+              <b-form-group label="From date" label-for="from_create_date">
                 <date-picker 
-                  id="create_datetime" 
-                  v-model="form.create_datetime"
+                  id="from_create_date" 
+                  v-model="form.from_create_date"
+                  :config="options"
+                ></date-picker>
+              </b-form-group>
+            </b-col>
+
+            <b-col cols=6>
+              <b-form-group label="To date" label-for="to_create_date">
+                <date-picker 
+                  id="to_create_date" 
+                  v-model="form.to_create_date"
                   :config="options"
                 ></date-picker>
               </b-form-group>
@@ -135,7 +148,7 @@
             </b-col>
           </b-row>
 
-          <b-button type="submit" variant="primary">Submit</b-button>&nbsp;
+          <b-button type="submit" variant="primary">Filter</b-button>&nbsp;
           <b-button type="reset" variant="danger">Reset</b-button>
 
         </b-form>
@@ -151,7 +164,7 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 import { mapGetters } from 'vuex';
-import { getTargets, convertDateToISOString } from '@/utils.js';
+import { getTargets } from '@/utils.js';
 
 export default {
   name: 'filtrationSidebar',
@@ -169,9 +182,10 @@ export default {
         subcategory: null,
         from_account: null,
         on_account: null,
-        create_datetime: null,
+        from_create_date: null,
+        to_create_date: null,
         place: null,
-        search: '',
+        search: null,
       },
       transactionTypes: [
         {value: null, text: '--Select item--'},
@@ -180,18 +194,27 @@ export default {
         { value: 'TEC', text: 'Technical'},
       ],
       options: {
-        format: 'DD.MM.YYYY, HH:mm:ss',
+        format: 'DD.MM.YYYY',
       },
     }
   },
   computed: {
+    transactionsOrdering() {
+      return this.$store.getters.ordering.transactions;
+    },
+    transactionsFilters() {
+      return this.$store.getters.filter.transactions;
+    },
+    transactionsSearch() {
+      return this.$store.getters.search.transactions;
+    },
     ...mapGetters([
         'accounts', 'currencies', 'categories',
         'subcategories', 'places',
     ]),
   },
   methods: {
-    onSubmit(evt) {
+    onFilter(evt) {
       evt.preventDefault();
       const params = {params: {
         from_amount: this.form.from_amount,
@@ -202,31 +225,84 @@ export default {
         subcategory: this.form.subcategory,
         from_account: this.form.from_account,
         on_account: this.form.on_account,
-        create_datetime: convertDateToISOString(this.form.create_datetime),
+        from_create_date: this.form.from_create_date,
+        to_create_date: this.form.to_create_date,
         place: this.form.place,
-      }}
+        ordering: this.transactionsOrdering,
+        search: this.form.search,
+      }};
+      this.$store.commit('SET_FILTER', {
+        item: 'transactions',
+        filters: {
+          from_amount: this.form.from_amount,
+          to_amount: this.form.to_amount,
+          currency: this.form.currency,
+          trans_type: this.form.trans_type,
+          category: this.form.category,
+          subcategory: this.form.subcategory,
+          from_account: this.form.from_account,
+          on_account: this.form.on_account,
+          from_create_date: this.form.from_create_date,
+          to_create_date: this.form.to_create_date,
+          place: this.form.place,
+        },
+      });
       this.$store.dispatch('getTransactions', params);
     },
-    onReset(evt) {
+    onFilterReset(evt) {
       evt.preventDefault();
-      this.form.from_amount = null,
-      this.form.to_amount = null,
+      this.form.from_amount = null;
+      this.form.to_amount = null;
       this.form.currency = null;
       this.form.trans_type = null;
       this.form.category = null;
       this.form.subcategory = null;
       this.form.from_account = null;
       this.form.on_account = null;
-      this.form.create_datetime = null;
+      this.form.from_create_date = null;
+      this.form.to_create_date = null;
       this.form.place = null;
-      this.$store.dispatch('getTransactions');
+      this.$store.commit('RESET_FILTER', 'transactions')
+      this.$store.dispatch('getTransactions', {params: {
+        ordering: this.transactionsOrdering,
+        search: this.form.search,
+      }});
     },
     onSearch(evt) {
       evt.preventDefault();
       const params = {params: {
         search: this.form.search,
-      }}
+        ordering: this.transactionsOrdering,
+        ...this.transactionsFilters,
+      }};
+      this.$store.commit('SET_SEARCH', {
+        item: 'transactions',
+        search: this.form.search,
+      });
       this.$store.dispatch('getTransactions', params);
+    },
+    onSearchReset(evt) {
+      evt.preventDefault();
+      this.form.search = null;
+      this.$store.commit('RESET_SEARCH', 'transactions')
+      this.$store.dispatch('getTransactions', {params: {
+        ordering: this.transactionsOrdering,
+        ...this.transactionsFilters,
+      }});
+    },
+    updateFilterSearchData() {
+      this.form.from_amount = this.transactionsFilters.from_amount;
+      this.form.to_amount = this.transactionsFilters.to_amount;
+      this.form.currency = this.transactionsFilters.currency;
+      this.form.trans_type = this.transactionsFilters.trans_type;
+      this.form.category = this.transactionsFilters.category;
+      this.form.subcategory = this.transactionsFilters.subcategory;
+      this.form.from_account = this.transactionsFilters.from_account;
+      this.form.on_account = this.transactionsFilters.on_account;
+      this.form.from_create_date = this.transactionsFilters.from_create_date;
+      this.form.to_create_date = this.transactionsFilters.to_create_date;
+      this.form.place = this.transactionsFilters.place;
+      this.form.search = this.transactionsSearch;
     },
     getTargets: getTargets,
     getFilterAccounts(currencyId) {
@@ -275,6 +351,7 @@ export default {
     this.$store.dispatch('getCategories', { params: {'get_all': 'true'}});
     this.$store.dispatch('getSubcategories', { params: {'get_all': 'true'}});
     this.$store.dispatch('getPlaces', { params: {'get_all': 'true'}});
+    this.updateFilterSearchData()
   },
 }
 </script>

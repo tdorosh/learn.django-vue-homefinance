@@ -3,6 +3,7 @@ from decimal import Decimal
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework import status
+from rest_framework import filters as drf_filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,9 +18,11 @@ from accounting import filters
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = models.Transaction.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter, drf_filters.OrderingFilter]
     filterset_class = filters.TransactionFilterSet
-    search_fields = ['notes',]
+    search_fields = ['notes']
+    ordering_fields = ['amount', 'create_datetime']
+    ordering = ['-create_datetime']
     serializer_class = serializers.TransactionSerializer
     serializer_action_class = {
         'list': serializers.RetrieveTransactionSerializer,
@@ -32,7 +35,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
     def get_queryset(self):
-        return models.Transaction.objects.filter(owner=self.request.user).order_by('create_datetime')
+        return models.Transaction.objects.filter(owner=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -205,9 +208,11 @@ class AccountViewSet(viewsets.ModelViewSet):
     queryset = models.Account.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
     pagination_class = Unpaginated
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter, drf_filters.OrderingFilter]
     filterset_class = filters.AccountFilterSet
-    search_fields = ['title',]
+    search_fields = ['title', 'notes']
+    ordering_fields = ['amount', 'create_datetime']
+    ordering = ['-create_datetime']
     serializer_class = serializers.AccountSerializer
     serializer_action_class = {
         'list': serializers.RetrieveAccountSerializer,
@@ -220,7 +225,7 @@ class AccountViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
     def get_queryset(self):
-        return models.Account.objects.filter(owner=self.request.user).order_by('amount')
+        return models.Account.objects.filter(owner=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -228,12 +233,14 @@ class AccountViewSet(viewsets.ModelViewSet):
 class AccountJournalListView(generics.ListAPIView):
     queryset = models.AccountJournal.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, drf_filters.OrderingFilter]
     filterset_class = filters.AccountJournalFilterSet
+    ordering_fields = ['amount_before', 'amount_after', 'timestamp']
+    ordering = ['-timestamp']
     serializer_class = serializers.AccountJournalSerializer
 
     def get_queryset(self):
-        return models.AccountJournal.objects.filter(owner=self.request.user).order_by('timestamp')
+        return models.AccountJournal.objects.filter(owner=self.request.user)
 
 class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = models.Currency.objects.all()
@@ -251,7 +258,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Category.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
     pagination_class = Unpaginated
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter]
     filterset_class = filters.CategoryFilterSet
     search_fields = ['name',]
     serializer_class = serializers.CategorySerializer
@@ -266,7 +273,7 @@ class SubcategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Subcategory.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
     pagination_class = Unpaginated
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter]
     filterset_class = filters.SubcategoryFilterSet
     search_fields = ['name',]
     serializer_class = serializers.SubcategorySerializer

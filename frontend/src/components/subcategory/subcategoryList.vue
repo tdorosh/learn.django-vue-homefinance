@@ -1,10 +1,18 @@
 <template>
   <div class="container">
-      <h3>Subcategories List</h3>
-      <b-button @click="showCreateModal()" variant="info">Create</b-button>
+    <b-row>
+      <b-col cols="6">
+        <h3>Subcategories List</h3>
+        <b-button @click="showCreateModal()" variant="info">Create</b-button>
+      </b-col>
+    </b-row>
+
+    <b-row>
       <b-alert variant="success" :show="showSuccessAlert" dismissible>Subcategory was created successfully.</b-alert>
       <b-alert variant="info" :show="showInfoAlert" dismissible>Subcategory was updated successfully.</b-alert>
       <b-alert variant="warning" :show="showWarningAlert" dismissible>Subcategory was deleted successfully.</b-alert>
+    </b-row>
+
     <b-row>
       <b-col cols="9">
         <b-row>
@@ -72,6 +80,12 @@ export default {
     };
   },
   computed: {
+    subcategoriesFilters() {
+      return this.$store.getters.filter.subcategories;
+    },
+    subcategoriesSearch() {
+      return this.$store.getters.search.subcategories;
+    },
     subcategories() {
       const rawSubcategories = this.$store.getters.subcategories;
       const subcategories = []
@@ -93,6 +107,14 @@ export default {
           this.showWarningAlert=true;
         })
     },
+    setPaginationRequest(page) {
+      const params = { params: {
+        page: page,
+        ...this.subcategoriesFilters,
+        search: this.subcategoriesSearch,
+      }};
+      this.$store.dispatch('getSubcategories', params);
+    },
     showCreateModal() {
       this.action = 'create';
       this.modalTitle = 'Create Subcategory'
@@ -108,16 +130,13 @@ export default {
       this.subcategoryId = subcategoryId;
       this.$bvModal.show('deleteSubcategory');
     },
-    setPaginationRequest(page) {
-      const params = { params: {
-        page: page,
-      }};
-      this.$store.dispatch('getSubcategories', params);
-    },
   },
 
   beforeMount() {
-    this.$store.dispatch('getSubcategories');
+    this.$store.dispatch('getSubcategories', {params: {
+      ...this.subcategoriesFilters,
+      search: this.subcategoriesSearch,
+    }});
   },  
 }
 </script>

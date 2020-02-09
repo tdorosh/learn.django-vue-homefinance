@@ -3,14 +3,29 @@ export const AUTH_REQUEST = 'AUTH_REQUEST'
 export const AUTH_SUCCESS = 'AUTH_SUCCESS'
 export const AUTH_ERROR = 'AUTH_ERROR'
 export const AUTH_LOGOUT = 'AUTH_LOGOUT'
+
 // User mutations types
 export const SET_USER = 'SET_USER'
 export const CREATE_USER = 'CREATE_USER'
 export const UPDATE_USER = 'UPDATE_USER'
 export const DELETE_USER = 'REMOVE_USER'
 export const CHANGE_USER_PASSWORD = 'CHANGE_USER_PASSWORD'
-//Mutation for save objects count
+
+//Mutation types for save objects count
 export const SET_OBJECTS_COUNT = 'SET_OBJECTS_COUNT'
+
+//Filter mutations types
+export const SET_FILTER = 'SET_FILTER'
+export const RESET_FILTER = 'RESET_FILTER'
+
+//Ordering mutations types
+export const SET_ORDERING = 'SET_ORDERING'
+export const RESET_ORDERING = 'RESET_ORDERING'
+
+//Search mutations types
+export const SET_SEARCH = 'SET_SEARCH'
+export const RESET_SEARCH = 'RESET_SEARCH'
+
 //Transactions mutations types
 export const SET_TRANSACTIONS = 'SET_TRANSACTIONS'
 export const SET_TRANSACTION = 'SET_TRANSACTION'
@@ -24,7 +39,7 @@ export const SET_ACCOUNT = 'SET_ACCOUNT'
 export const CREATE_ACCOUNT = 'CREATE_ACCOUNT'
 export const REMOVE_ACCOUNT = 'REMOVE_ACCOUNT'
 
-//Accounts Journals mutations types
+//Accounts Journal mutations types
 export const SET_JOURNAL = 'SET_JOURNAL'
 
 //Currencies mutations types
